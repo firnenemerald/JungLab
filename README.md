@@ -1,5 +1,6 @@
 # Jung Lab
 Jung Lab Codebase for experiment analysis
+Lab homepage: https://junglab.github.io/
 ## ChAT Analysis
 ## PV Analysis
 ## HFT Analysis
