@@ -1,6 +1,6 @@
 # Jung Lab
 
-$$ This is Edit 2
+** This is Edit
 
 Jung Lab Codebase for experiment analysis
 Lab homepage: https://junglab.github.io/
