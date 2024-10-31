@@ -5,6 +5,7 @@
 Jung Lab Codebase for experiment analysis
 Lab homepage: https://junglab.github.io/
 ## ChAT Analysis
+main author Horim Shingit
 ## PV Analysis
 ## HFT Analysis
 ## Behavior Analysis
@@ -12,4 +13,4 @@ Lab homepage: https://junglab.github.io/
 ## Dannce related
 ## Inscopix macro
 ## Experiment macro
-## Arduino
+
