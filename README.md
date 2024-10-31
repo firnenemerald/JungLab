@@ -5,7 +5,7 @@
 Jung Lab Codebase for experiment analysis
 Lab homepage: https://junglab.github.io/
 ## ChAT Analysis
-main author Horim Shingit
+main author Horim Shin
 ## PV Analysis
 ## HFT Analysis
 ## Behavior Analysis
