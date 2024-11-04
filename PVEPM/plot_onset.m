@@ -274,14 +274,14 @@ for i = 1 : size(result,1)
     end
 end
 %%
-barplot1(pre_goa05,post_goa05,'go05')
-barplot1(pre_goa1,post_goa1,'go1')
-barplot1(pre_roa05,post_roa05,'ro05')
-barplot1(pre_roa1,post_roa1,'ro1')
-barplot1(pre_gca05,post_gca05,'gc05')
-barplot1(pre_gca1,post_gca1,'gc1')
-barplot1(pre_rca05,post_rca05,'rc05')
-barplot1(pre_rca1,post_rca1,'rc1')
+    barplot1(pre_goa05,post_goa05,'go05')
+    barplot1(pre_goa1,post_goa1,'go1')
+    barplot1(pre_roa05,post_roa05,'ro05')
+    barplot1(pre_roa1,post_roa1,'ro1')
+    barplot1(pre_gca05,post_gca05,'gc05')
+    barplot1(pre_gca1,post_gca1,'gc1')
+    barplot1(pre_rca05,post_rca05,'rc05')
+    barplot1(pre_rca1,post_rca1,'rc1')
 %%
 barplot1(bgoa_pre05,bgoa_post05,'go05');
 barplot1(bgoa_pre1,bgoa_post1,'go1');
