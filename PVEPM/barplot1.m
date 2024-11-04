@@ -25,6 +25,7 @@ y_max = max([mean(pre_goa05), mean(post_goa05)]) + 0.5;
 plot([1, 2], [y_max, y_max], 'k-', 'LineWidth', 1.5);
 text(1.5, y_max + 0.3, sprintf('%s\np = %.3f', significance, p_value), ...
     'HorizontalAlignment', 'center', 'FontSize', 12, 'Color', 'blue');
+set(gca, 'XTick', [1, 2], 'XTickLabel', {'pre-onset', 'post-onset'});
 hold off;
 title(ttext);
 end
