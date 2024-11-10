@@ -1,5 +1,5 @@
-%% PV_CorrectSignal.m
-% Correct PV signal artifacts and return the corrected signal
+%% PV_CorrectAutomatic.m
+% Automatically correct PV signal artifacts and return the corrected signal
 
 % Copyright (C) 2024 Chanhee Jeong
 
@@ -16,7 +16,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-function signal_corrected = PV_CorrectSignal(signal, windowSize, steepZCutoff, clusterSize, paddingSize)
+function signal_corrected = PV_CorrectAutomatic(signal, windowSize, steepZCutoff, clusterSize, paddingSize)
 
     % clusterSize should be larger than 2 x paddingSize to avoid merger of clusters - if not, raise an error
     if (clusterSize <= 2 * paddingSize)
