@@ -2,7 +2,6 @@ clear all
 load('norm_hmap.mat');
 
 %%
-
 data = struct2cell(Heatmap);
 dataname = fieldnames(Heatmap);
 
@@ -38,12 +37,30 @@ for i = 1 : size(data,1)
     close all
 end
 
+save('hmapmidsave.mat','result1',"result05","result01",'path1')
+clear all
 %%
+load('hmapmidsave.mat')
+
+%%
+
 fdsa(result01)
 sgtitle (['total:0.1second'])
+subplot(1,2,1)
+hold on
+polygon = [350,800;460,800;460,430;800,430;800,340;460,340;460,30;350,30;350,340;30,340;30,430;350,430];
+poly = drawpolygon('Position', polygon, 'FaceAlpha', 0, 'Color', [0 0 0]);
+hold off
+subplot(1,2,2)
+hold on
+polygon = [350,800;460,800;460,430;800,430;800,340;460,340;460,30;350,30;350,340;30,340;30,430;350,430];
+poly = drawpolygon('Position', polygon, 'FaceAlpha', 0, 'Color', [0 0 0]);
+hold off
+%%
 fileName = fullfile(path1,'hmap_01.png');
 saveas(gcf, fileName);
 close all
+
 
 fdsa(result05)
 sgtitle (['total:0.5second'])
@@ -51,13 +68,19 @@ fileName = fullfile(path1,'hmap_05.png');
 saveas(gcf, fileName);
 close all
 
+
+
 fdsa(result1)
 sgtitle (['total:1second'])
 fileName = fullfile(path1,'hmap_1.png');
 saveas(gcf, fileName);
 close all
 
+% result01(8) = []; result01(3) = []; result01(1) = [];
+% result05(8) = []; result05(3) = []; result05(1) = [];
+% result1(8) = []; result1(3) = []; result1(1) = [];
 
+%%
 function fdsa(result01)
 allg01 = cell(900,900);
 allr01 = cell(900,900);
@@ -72,8 +95,8 @@ end
 
 for x = 1 : size(allr01,1)
      for y = 1 : size(allr01,2)
-         aallg01(x,y) = mean(allg01{x,y});
-         aallr01(x,y) = mean(allr01{x,y});
+         aallg01(x,y) = nanmean(allg01{x,y});
+         aallr01(x,y) = nanmean(allr01{x,y});
      end
 end
 
@@ -85,6 +108,7 @@ subplot(1, 2, 1);
 imagesc(aallg01);
 colormap(jet);
 caxis([minVal, maxVal]);
+caxis([minVal, maxVal-0.5]);
 set(gca, 'Color', [1 1 1]);
 ghmap_alpha = ~isnan(aallg01);
 set(gca().Children, 'AlphaData', ghmap_alpha);
@@ -94,6 +118,7 @@ subplot(1, 2, 2);
 imagesc(aallr01);
 colormap(jet);
 caxis([minVal, maxVal]);
+caxis([minVal, maxVal-0.5]);
 set(gca, 'Color', [1 1 1]);
 rhmap_alpha = ~isnan(aallr01);
 set(gca().Children, 'AlphaData', rhmap_alpha);
@@ -104,60 +129,58 @@ end
 
 
 function result=asdf(g01,r01)
- g01_1 = cell(900,900);
-    r01_1 = cell(900,900);
-    for x = 1 : size(g01,1)
-        for y = 1 : size(g01,2)
-            if ~isempty(g01{x,y})
-                try
-                g01_1{x,y} = [g01_1{x,y}; g01{x,y}];
-                catch
-                end
-                try
-                g01_1{x-1,y} = [g01_1{x-1,y}; g01{x,y}];
-                catch
-                end
-                try
-                g01_1{x+1,y} = [g01_1{x+1,y}; g01{x,y}];
-                catch
-                end
-                try
-                g01_1{x,y-1} = [g01_1{x,y-1}; g01{x,y}];
-                catch
-                end
-                try
-                g01_1{x,y+1} = [g01_1{x,y+1}; g01{x,y}];
-                catch
-                end
-                try
-                r01_1{x,y} = [r01_1{x,y}; r01{x,y}];
-                catch
-                end
-                try
-                r01_1{x-1,y} = [r01_1{x-1,y}; r01{x,y}];
-                catch
-                end
-                try
-                r01_1{x+1,y} = [r01_1{x+1,y}; r01{x,y}];
-                
-                catch
-                end
-                try
-                r01_1{x,y-1} = [r01_1{x,y-1}; r01{x,y}];
-                catch
-                end
-                try
-                r01_1{x,y+1} = [r01_1{x,y+1}; r01{x,y}];
-                catch
+g01_1 = cell(900, 900);
+r01_1 = cell(900, 900);
+g01_2 = cell(900, 900);
+r01_2 = cell(900, 900);
+radius = 10; 
+
+for x = 1:size(g01, 1)
+    for y = 1:size(g01, 2)
+        if ~isempty(g01{x, y})
+            try
+                g01_1{x, y} = [g01_1{x, y}; g01{x, y}];
+                r01_1{x, y} = [r01_1{x, y}; r01{x, y}];
+            catch, end
+
+            try
+                g01_2{x, y} = [g01_2{x, y}; g01{x, y}];
+                r01_2{x, y} = [r01_2{x, y}; r01{x, y}];
+            catch, end
+            
+            for dx = -radius:radius
+                for dy = -radius:radius
+                    if sqrt(dx^2 + dy^2) <= radius
+                        try
+                            g01_1{x + dx, y + dy} = [g01_1{x + dx, y + dy}; g01{x, y}];
+                        catch, end
+                        try
+                            r01_1{x + dx, y + dy} = [r01_1{x + dx, y + dy}; r01{x, y}];
+                        catch, end
+                    end
                 end
             end
         end
     end
+end
 
+    polygon = [350,800;460,800;460,430;800,430;800,340;460,340;460,30;350,30;350,340;30,340;30,430;350,430];
+    polygon=polygon(:,[2,1]);
     for x = 1 : size(g01,1)
         for y = 1 : size(g01,2)
-            ag01(x,y)= mean(g01_1{x,y});
-            ar01(x,y)= mean(r01_1{x,y});
+            if ~inpolygon(x,y,polygon(:,1),polygon(:,2))
+                g01_1{x,y} = [];
+                r01_1{x,y} = [];
+            end
+        end
+    end
+
+    g01 = g01(1:900,1:900);
+    r01 = r01(1:900,1:900);
+    for x = 1 : size(g01,1)
+        for y = 1 : size(g01,2)
+            ag01(x,y)= nanmean(g01_1{x,y});
+            ar01(x,y)= nanmean(r01_1{x,y});
         end
     end
     minVal = min([ag01(:); ar01(:)], [], 'omitnan');
@@ -185,4 +208,6 @@ function result=asdf(g01,r01)
     colorbar('Position', [0.92, 0.11, 0.02, 0.815]);
     result.gcamp = g01_1;
     result.rcamp = r01_1;
+    result.gcamp_raw = g01_2;
+    result.rcamp_raw = r01_2;
 end

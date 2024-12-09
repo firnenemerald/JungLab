@@ -23,6 +23,6 @@ explist = list(useind);
 for i = 1 : size(explist)
     exppath{i,1} = fullfile(explist(i).folder,explist(i).name);
 end
-
+% exppath(2)=[];
 save("pvdual_path.mat",'exppath')
 clear all

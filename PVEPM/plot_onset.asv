@@ -2,6 +2,7 @@ clear all
 load("Arearange.mat")
 load('dlcsmooth.mat');
 load("errorfixed.mat")
+%load('decaycorrected.mat')
 
 mergeall;
 
@@ -48,7 +49,7 @@ for i = 1:size(gvalues, 1)
 end
 
 
-[~, p] = ttest(gvalues, rvalues);
+[~, p] = ttest(gvalues- rvalues);
 
 if p < 0.001
     stars = '***';
@@ -160,9 +161,9 @@ for i = 1 : size(result,1)
     roa_post1 = [];
     for j = 1 : size(result{i}.RCaMP_OAonsetsig,1)
         roa_pre05 = [roa_pre05,mean(result{i}.RCaMP_OAonsetsig(j,31:60))];
-        roa_post05 = [roa_post05,result{i}.mean(RCaMP_OAonsetsig(j,62:91))];
-        roa_pre1 = [roa_pre1,result{i}.mean(RCaMP_OAonsetsig(j,1:60))];
-        roa_post1 = [roa_post1,result{i}.mean(RCaMP_OAonsetsig(j,62:121))];
+        roa_post05 = [roa_post05,mean(result{i}.RCaMP_OAonsetsig(j,62:91))];
+        roa_pre1 = [roa_pre1,mean(result{i}.RCaMP_OAonsetsig(j,1:60))];
+        roa_post1 = [roa_post1,mean(result{i}.RCaMP_OAonsetsig(j,62:121))];
     end
     pre_roa05(i,1) = nanmean(roa_pre05);
     post_roa05(i,1) = nanmean(roa_post05);
@@ -176,10 +177,10 @@ for i = 1 : size(result,1)
     goa_pre1 = [];
     goa_post1 = [];
     for j = 1 : size(result{i}.GCaMP_OAonsetsig,1)
-        goa_pre05 = [goa_pre05,result{i}.mean(GCaMP_OAonsetsig(j,31:60))];
-        goa_post05 = [goa_post05,result{i}.mean(GCaMP_OAonsetsig(j,62:91))];
-        goa_pre1 = [goa_pre1,result{i}.mean(GCaMP_OAonsetsig(j,1:60))];
-        goa_post1 = [goa_post1,result{i}.mean(GCaMP_OAonsetsig(j,62:121))];
+        goa_pre05 = [goa_pre05,mean(result{i}.GCaMP_OAonsetsig(j,31:60))];
+        goa_post05 = [goa_post05,mean(result{i}.GCaMP_OAonsetsig(j,62:91))];
+        goa_pre1 = [goa_pre1,mean(result{i}.GCaMP_OAonsetsig(j,1:60))];
+        goa_post1 = [goa_post1,mean(result{i}.GCaMP_OAonsetsig(j,62:121))];
     end
     pre_goa05(i,1) = nanmean(goa_pre05);
     post_goa05(i,1) = nanmean(goa_post05);
@@ -193,10 +194,10 @@ for i = 1 : size(result,1)
     gca_pre1 = [];
     gca_post1 = [];
     for j = 1 : size(result{i}.GCaMP_CAonsetsig,1)
-        gca_pre05 = [gca_pre05,result{i}.mean(GCaMP_CAonsetsig(j,31:60))];
-        gca_post05 = [gca_post05,result{i}.mean(GCaMP_CAonsetsig(j,62:91))];
-        gca_pre1 = [gca_pre1,result{i}.mean(GCaMP_CAonsetsig(j,1:60))];
-        gca_post1 = [gca_post1,result{i}.mean(GCaMP_CAonsetsig(j,62:121))];
+        gca_pre05 = [gca_pre05,mean(result{i}.GCaMP_CAonsetsig(j,31:60))];
+        gca_post05 = [gca_post05,mean(result{i}.GCaMP_CAonsetsig(j,62:91))];
+        gca_pre1 = [gca_pre1,mean(result{i}.GCaMP_CAonsetsig(j,1:60))];
+        gca_post1 = [gca_post1,mean(result{i}.GCaMP_CAonsetsig(j,62:121))];
     end
     pre_gca05(i,1) = nanmean(gca_pre05);
     post_gca05(i,1) = nanmean(gca_post05);
@@ -210,10 +211,10 @@ for i = 1 : size(result,1)
     rca_pre1 = [];
     rca_post1 = [];
     for j = 1 : size(result{i}.RCaMP_CAonsetsig,1)
-        rca_pre05 = [rca_pre05,result{i}.mean(RCaMP_CAonsetsig(j,31:60))];
-        rca_post05 = [rca_post05,result{i}.mean(RCaMP_CAonsetsig(j,62:91))];
-        rca_pre1 = [rca_pre1,result{i}.mean(RCaMP_CAonsetsig(j,1:60))];
-        rca_post1 = [rca_post1,result{i}.mean(RCaMP_CAonsetsig(j,62:121))];
+        rca_pre05 = [rca_pre05,mean(result{i}.RCaMP_CAonsetsig(j,31:60))];
+        rca_post05 = [rca_post05,mean(result{i}.RCaMP_CAonsetsig(j,62:91))];
+        rca_pre1 = [rca_pre1,mean(result{i}.RCaMP_CAonsetsig(j,1:60))];
+        rca_post1 = [rca_post1,mean(result{i}.RCaMP_CAonsetsig(j,62:121))];
     end
     pre_rca05(i,1) = nanmean(rca_pre05);
     post_rca05(i,1) = nanmean(rca_post05);
@@ -274,14 +275,14 @@ for i = 1 : size(result,1)
     end
 end
 %%
-barplot1(pre_goa05,post_goa05,'go05')
-barplot1(pre_goa1,post_goa1,'go1')
-barplot1(pre_roa05,post_roa05,'ro05')
-barplot1(pre_roa1,post_roa1,'ro1')
-barplot1(pre_gca05,post_gca05,'gc05')
-barplot1(pre_gca1,post_gca1,'gc1')
-barplot1(pre_rca05,post_rca05,'rc05')
-barplot1(pre_rca1,post_rca1,'rc1')
+    barplot1(pre_goa05,post_goa05,'go05')
+    barplot1(pre_goa1,post_goa1,'go1')
+    barplot1(pre_roa05,post_roa05,'ro05')
+    barplot1(pre_roa1,post_roa1,'ro1')
+    barplot1(pre_gca05,post_gca05,'gc05')
+    barplot1(pre_gca1,post_gca1,'gc1')
+    barplot1(pre_rca05,post_rca05,'rc05')
+    barplot1(pre_rca1,post_rca1,'rc1')
 %%
 barplot1(bgoa_pre05,bgoa_post05,'go05');
 barplot1(bgoa_pre1,bgoa_post1,'go1');
@@ -313,7 +314,8 @@ dlctime = [0:1/29.99:(1/29.99)*size(dlc,1)]';
 oarange =cD.OArange;
 carange = cD.CArange;
 
-oatime=(oarange-cD.syncframe)*(1/29.99); catime =(carange-cD.syncframe)*(1/29.99);
+oasynced = oarange-cD.syncframe ; casynced = carange-cD.syncframe;
+oatime=(oasynced)*(1/29.99); catime =(casynced)*(1/29.99);
 for i = 1 : size(oatime,1)
     temp = [];
     for j = 1 : size(oatime,2)
@@ -384,6 +386,7 @@ for i = 1 : size(casyncdoric,1)
     end
 end
 caonset = casyncdoric(caonsetind,1);
+casynced = casynced(caonsetind,:);
 for i = 1 : size(caonset)
     gcaonsetsig(i,:) = zgcamp(caonset(i,1)-60:caonset(i,1)+60);
     rcaonsetsig(i,:) = zrcamp(caonset(i,1)-60:caonset(i,1)+60);
@@ -436,6 +439,8 @@ title('closed arm onset:rcamp');
 grid on;
 hold off;
 
+
+
 oaonsetind = [];
 for i = 1 : size(oasyncdoric,1)
     if oasyncdoric(i,1) > 60 & i==1
@@ -447,6 +452,7 @@ for i = 1 : size(oasyncdoric,1)
     end
 end
 oaonset = oasyncdoric(oaonsetind,1);
+oasynced = oasynced(oaonsetind,:);
 for i = 1 : size(oaonset)
     goaonsetsig(i,:) = zgcamp(oaonset(i,1)-60:oaonset(i,1)+60);
     roaonsetsig(i,:) = zrcamp(oaonset(i,1)-60:oaonset(i,1)+60);
@@ -498,10 +504,51 @@ title('open arm onset:rcamp');
 grid on;
 hold off;
 
+diffdlc = diff(dlc);
+for i = 1 : size(diffdlc,1)
+    headvel(i,1) = sqrt(diffdlc(i,2)^2 + diffdlc(i,3)^2);
+end
+
+
+
+for i = 1 : size(oasynced,1)
+    oaonsetvel(i,:)=headvel(oasynced(i,1)-30:oasynced(i,1)+30);
+end
+for i = 1 : size(casynced,1)
+    caonsetvel(i,:)=headvel(casynced(i,1)-30:casynced(i,1)+30);
+end
+
+
+for i = 1 : size(oaonset)
+    clear temp1 temp2
+    temp1 = gcamp(oaonset(i,1)-60:oaonset(i,1)+60);
+    temp1 = (temp1 - nanmean(temp1(1:60)))/nanstd(temp1(1:60));
+    goaonsetsig_sz(i,:) = temp1;
+    temp2 = rcamp(oaonset(i,1)-60:oaonset(i,1)+60);
+    temp2 = (temp2 - nanmean(temp2(1:60)))/nanstd(temp2(1:60));
+    roaonsetsig_sz(i,:) = temp2;
+end
+for i = 1 : size(caonset)
+    clear temp1 temp2
+    temp1 = gcamp(caonset(i,1)-60:caonset(i,1)+60);
+    temp1 = (temp1 - nanmean(temp1(1:60)))/nanstd(temp1(1:60));
+    gcaonsetsig_sz(i,:) = temp1;
+    temp2 = rcamp(caonset(i,1)-60:caonset(i,1)+60);
+    temp2 = (temp2 - nanmean(temp2(1:60)))/nanstd(temp2(1:60));
+    rcaonsetsig_sz(i,:) = temp2;
+end
+
+
 result.gvalue = gvalue;
 result.rvalue = rvalue;
 result.RCaMP_OAonsetsig = roaonsetsig;
 result.RCaMP_CAonsetsig = rcaonsetsig;
 result.GCaMP_OAonsetsig = goaonsetsig;
 result.GCaMP_CAonsetsig = gcaonsetsig;
+result.OAonsetvel = oaonsetvel;
+result.CAonsetvel = caonsetvel;
+result.RCaMP_OAonsetsig2 = roaonsetsig_sz;
+result.RCaMP_CAonsetsig2 = rcaonsetsig_sz;
+result.GCaMP_OAonsetsig2 = goaonsetsig_sz;
+result.GCaMP_CAonsetsig2 = gcaonsetsig_sz;
 end

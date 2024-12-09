@@ -2,6 +2,7 @@ clear all
 load("Arearange.mat")
 load('dlcsmooth.mat');
 load("errorfixed.mat")
+%load('decaycorrected.mat')
 
 mergeall;
 
@@ -48,7 +49,7 @@ for i = 1:size(gvalues, 1)
 end
 
 
-[~, p] = ttest(gvalues, rvalues);
+[~, p] = ttest(gvalues- rvalues);
 
 if p < 0.001
     stars = '***';
@@ -313,7 +314,8 @@ dlctime = [0:1/29.99:(1/29.99)*size(dlc,1)]';
 oarange =cD.OArange;
 carange = cD.CArange;
 
-oatime=(oarange-cD.syncframe)*(1/29.99); catime =(carange-cD.syncframe)*(1/29.99);
+oasynced = oarange-cD.syncframe ; casynced = carange-cD.syncframe;
+oatime=(oasynced)*(1/29.99); catime =(casynced)*(1/29.99);
 for i = 1 : size(oatime,1)
     temp = [];
     for j = 1 : size(oatime,2)
@@ -384,6 +386,7 @@ for i = 1 : size(casyncdoric,1)
     end
 end
 caonset = casyncdoric(caonsetind,1);
+casynced = casynced(caonsetind,:);
 for i = 1 : size(caonset)
     gcaonsetsig(i,:) = zgcamp(caonset(i,1)-60:caonset(i,1)+60);
     rcaonsetsig(i,:) = zrcamp(caonset(i,1)-60:caonset(i,1)+60);
@@ -449,6 +452,7 @@ for i = 1 : size(oasyncdoric,1)
     end
 end
 oaonset = oasyncdoric(oaonsetind,1);
+oasynced = oasynced(oaonsetind,:);
 for i = 1 : size(oaonset)
     goaonsetsig(i,:) = zgcamp(oaonset(i,1)-60:oaonset(i,1)+60);
     roaonsetsig(i,:) = zrcamp(oaonset(i,1)-60:oaonset(i,1)+60);
@@ -500,10 +504,50 @@ title('open arm onset:rcamp');
 grid on;
 hold off;
 
+diffdlc = diff(dlc);
+for i = 1 : size(diffdlc,1)
+    bodvel(i,1) = sqrt(diffdlc(i,4)^2 + diffdlc(i,5)^2);
+end
+
+arena=cD.Arena;
+arenasize = sqrt((arena(1,1)-arena(2,1))^2 + (arena(1,2)-arena(2,2))^2);
+bodvel = bodvel*(700/arenasize);
+bodvel(find(bodvel > 15)) = nan;
+
+for i = 1 : size(oasynced,1)
+    oaonsetvel(i,:)=bodvel(oasynced(i,1)-15:oasynced(i,1)+30);
+end
+for i = 1 : size(casynced,1)
+    caonsetvel(i,:)=bodvel(casynced(i,1)-15:casynced(i,1)+30);
+end
+
+
+for i = 1 : size(oaonset)
+    clear temp1 temp2
+    temp1 = gcamp(oaonset(i,1)-30:oaonset(i,1)+60);
+    goaonsetsig_sz(i,:) = temp1;
+    temp2 = rcamp(oaonset(i,1)-30:oaonset(i,1)+60);
+    roaonsetsig_sz(i,:) = temp2;
+end
+for i = 1 : size(caonset)
+    clear temp1 temp2
+    temp1 = gcamp(caonset(i,1)-30:caonset(i,1)+60);
+    gcaonsetsig_sz(i,:) = temp1;
+    temp2 = rcamp(caonset(i,1)-30:caonset(i,1)+60);
+    rcaonsetsig_sz(i,:) = temp2;
+end
+
+
 result.gvalue = gvalue;
 result.rvalue = rvalue;
 result.RCaMP_OAonsetsig = roaonsetsig;
 result.RCaMP_CAonsetsig = rcaonsetsig;
 result.GCaMP_OAonsetsig = goaonsetsig;
 result.GCaMP_CAonsetsig = gcaonsetsig;
+result.OAonsetvel = oaonsetvel;
+result.CAonsetvel = caonsetvel;
+result.RCaMP_OAonsetsig2 = roaonsetsig_sz;
+result.RCaMP_CAonsetsig2 = rcaonsetsig_sz;
+result.GCaMP_OAonsetsig2 = goaonsetsig_sz;
+result.GCaMP_CAonsetsig2 = gcaonsetsig_sz;
 end

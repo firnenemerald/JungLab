@@ -38,8 +38,6 @@ end
 
 fffixind = unique(fffixind);
 
-inputdata(:,3)=repmat(1,size(inputdata,1),1);
-
 fffixind=sort(fffixind,'ascend');
 
 dfi=diff(fffixind);

@@ -16,7 +16,7 @@ save('norm_hmap.mat','Heatmap')
 
 function result = asdf(cD)
 
-dlc = cD.DLC(2:end,:);
+dlc = cD.DLC(1:end,:);
 gcamp = cD.GCaMP;
 rcamp = cD.RCaMP;
 time = [0:1/60.241:(1/60.241)*size(rcamp,1)]';
@@ -46,5 +46,5 @@ normhmap1=normhmap(hmap1,cD.Arena);
 
 result.normhmap01 = normhmap01;
 result.normhmap05 = normhmap05;
-result.normhmap1 = normhmap1;
+result.normhmap1 = normhmap1;   
 end

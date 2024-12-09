@@ -1,13 +1,18 @@
 clear all
 load("filereaded_doric.mat");
-
+try
+load("errorfixed.mat")
+catch
+end
 data = struct2cell(filereaded_doric);
 dataname= fieldnames(filereaded_doric);
 
 for i = 1  : size(data,1)
+    %%
     cD=data{i};
     dname = dataname{i};
     errorfixed_doric.(dname)=asdf(cD);
+    %%
 end
 
 save('errorfixed.mat','errorfixed_doric')

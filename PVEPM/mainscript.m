@@ -10,11 +10,13 @@ filereader_video;
 sync_dlc;
 clear all
 
+smooth_dlc;
+clear all
+
 fixerror_doric;
 clear all
 
 %% Analysis
-
 da_arearange;
 clear all
 

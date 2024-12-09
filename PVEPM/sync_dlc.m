@@ -17,18 +17,23 @@ for i = 1  : size(data,1)
     elseif strcmp(dataname{i},'PV_3_1_24_05_17_12_20_20_EPM')
         sync = 39;
     elseif strcmp(dataname{i},'PV_3_2_24_06_17_15_26_51_EPM')
-        sync = 46;
+        sync = -13;
     elseif strcmp(dataname{i},'PV_3_4_24_05_30_18_28_04_EPM')
-        sync = 44;
+        sync = -15;
     elseif strcmp(dataname{i},'PV_5_1_24_05_30_18_43_19_EPM')
-        sync = 31;
+        sync = -28;
     elseif strcmp(dataname{i},'PV_5_2_24_04_25_17_27_17_EPM')
-        sync = 56;
+        sync = -3;
     end
 
     dlc = cD.DLC;
-
-    dlc_synced=dlc(find(dlc(:,1)==sync):end,:);
+    if sync>=1
+        dlc_synced=dlc(find(dlc(:,1)==sync):end,:);
+    else
+        temp1 = [-28:0]';
+        temp1(:,2:13) = nan;
+        dlc_synced = [temp1;dlc];
+    end
 
     temp.DLC = dlc_synced;
     temp.syncframe = sync;
