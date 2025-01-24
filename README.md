@@ -1,16 +1,18 @@
 # Jung Lab
+Jung Lab codebase for experiment analysis
 
-** This is Edit
-
-Jung Lab Codebase for experiment analysis
-Lab homepage: https://junglab.github.io/
 ## ChAT Analysis
-main author Horim Shin
-## PV Analysis
-## HFT Analysis
-## Behavior Analysis
-## DeepLabCut related
-## Dannce related
-## Inscopix macro
-## Experiment macro
 
+## PV Analysis
+
+## HFT Analysis
+
+## Behavior Analysis
+
+## DeepLabCut related
+
+## Dannce related
+
+## Inscopix macro
+
+## Experiment macro
