@@ -13,8 +13,7 @@ function [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(mo
     % Construct file paths
     pairDir = fullfile(baseDir, 'inscopix_pair.xlsx');
     % Read data from the specified sheet
-    sheetName = strcat("ChAT_", mouseName);
-    pairArray = table2array(readtable(pairDir, 'Sheet', sheetName, 'Range', 'A:C', 'ReadVariableNames', false));
+    pairArray = table2array(readtable(pairDir, 'Sheet', mouseName, 'Range', 'A:C', 'ReadVariableNames', false));
     
     % Get cell signal data
     cellSignalBase = GetCellSignal(mouseName, 'B');

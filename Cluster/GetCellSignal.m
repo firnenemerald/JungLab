@@ -1,4 +1,4 @@
-%% Function to extract the cell signal data of specified mouse and status
+%% Function to get the cell signal data of specified mouse and status
 % Returns cell signal data (array with size: time point num x (1 + cell num))
 
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
@@ -9,8 +9,8 @@ function cellArray = GetCellSignal(mouseName, mouseStatus)
     baseDir = './data';
     
     % Construct file paths
-    signalFile = fullfile(baseDir, 'inscopix_csv', [mouseName '_' mouseStatus '.csv']);
-    propsFile = fullfile(baseDir, 'inscopix_csv', [mouseName '_' mouseStatus '-props.csv']);
+    signalFile = fullfile(baseDir, [mouseName '_' mouseStatus '.csv']);
+    propsFile = fullfile(baseDir, [mouseName '_' mouseStatus '-props.csv']);
     
     % Read the CSV files
     dataTable = readtable(signalFile);
