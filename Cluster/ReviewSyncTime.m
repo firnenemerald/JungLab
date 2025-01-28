@@ -1,5 +1,5 @@
 %% Function to review all mice's synctime and save the reviewed data
-% Returns syncTimes (cell array with size: mouse num x 1)
+% Reviews the sync time of all mice and saves the reviewed data to a CSV file
 
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later

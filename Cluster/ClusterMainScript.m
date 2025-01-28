@@ -14,10 +14,27 @@ close all
 
 % Load the data
 baseDir = './data';
-MOUSENAME = 'ChAT_853-3';
-MOUSESTATUS = 'P';
+videoDir = 'C:/Users/chanh/Downloads/ChAT_video';
+MOUSENAME = 'ChAT_514-2-3';
+MOUSESTATUS = 'B';
 
-% [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(MOUSENAME, baseDir);
-syncTimePark = GetSyncTime(MOUSENAME, MOUSESTATUS, baseDir);
+% cellSignalPark = GetCellSignal(MOUSENAME, MOUSESTATUS, baseDir);
+% [cellNamesPaired, signalPairedBase, signalPairedPark] = GetPairSignals(MOUSENAME, baseDir);
+
+% syncTimePark = GetSyncTime(MOUSENAME, MOUSESTATUS, baseDir);
+% ReviewSyncTime(baseDir);
 
 % GetAllMouseMeta(baseDir, true);
+
+% dlcCenter = GetDLCCoord(MOUSENAME, MOUSESTATUS, 'center', baseDir);
+
+reviewedVideo = ReviewRawVideo(MOUSENAME, MOUSESTATUS, videoDir, false)
+
+%ReviewSyncFrame(baseDir, videoDir);
+
+% {'ChAT_514-2-3'}    {'B'}    {[179]}    {[1251]}
+% {'ChAT_853-1'}    {'B'}    {[148]}    {[294]}
+% {'ChAT_853-3'}    {'P'}    {[237]}    {[758]}
+% {'ChAT_853-3'}    {'B'}    {[145]}    {[236]}
+% {'PV_15-4'}    {'B'}    {[226]}    {[166]}
+% {'PV_15-4'}    {'P'}    {[152]}    {[632]}
