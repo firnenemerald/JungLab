@@ -4,13 +4,13 @@
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
 
-function cellArray = GetCellSignal(mouseName, mouseStatus)
+function cellArray = GetCellSignal(mouseName, mouseStatus, baseDirectory)
     % Set default base directory
-    baseDir = './data';
+    baseDir = baseDirectory;
     
     % Construct file paths
-    signalFile = fullfile(baseDir, [mouseName '_' mouseStatus '.csv']);
-    propsFile = fullfile(baseDir, [mouseName '_' mouseStatus '-props.csv']);
+    signalFile = fullfile(baseDir, mouseName, [mouseName '_' mouseStatus '.csv']);
+    propsFile = fullfile(baseDir, mouseName, [mouseName '_' mouseStatus '-props.csv']);
     
     % Read the CSV files
     dataTable = readtable(signalFile);

@@ -6,9 +6,9 @@
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
 
-function [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(mouseName)
+function [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(mouseName, baseDirectory)
     % Set default base directory
-    baseDir = './data';
+    baseDir = baseDirectory;
     
     % Construct file paths
     pairDir = fullfile(baseDir, 'inscopix_pair.xlsx');
@@ -16,8 +16,8 @@ function [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(mo
     pairArray = table2array(readtable(pairDir, 'Sheet', mouseName, 'Range', 'A:C', 'ReadVariableNames', false));
     
     % Get cell signal data
-    cellSignalBase = GetCellSignal(mouseName, 'B');
-    cellSignalPark = GetCellSignal(mouseName, 'P');
+    cellSignalBase = GetCellSignal(mouseName, 'B', baseDir);
+    cellSignalPark = GetCellSignal(mouseName, 'P', baseDir);
 
     % Initialize variables
     cellNamesPaired = [];

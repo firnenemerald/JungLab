@@ -13,10 +13,11 @@ clear
 close all
 
 % Load the data
+baseDir = './data';
 MOUSENAME = 'ChAT_853-3';
+MOUSESTATUS = 'P';
 
-[cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(MOUSENAME);
-%syncTimeBase = GetSyncTime(MOUSENAME, 'B');
-%syncTimePark = GetSyncTime(MOUSENAME, 'P');
+% [cellNamesPaired, signalArrayBase, signalArrayPark] = GetPairSignals(MOUSENAME, baseDir);
+syncTimePark = GetSyncTime(MOUSENAME, MOUSESTATUS, baseDir);
 
-GetSyncTime('PV_15-4', 'B');
+% GetAllMouseMeta(baseDir, true);

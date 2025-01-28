@@ -4,40 +4,37 @@
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
 
-function syncTime = GetSyncTime(mouseName, mouseStatus)
+function syncTime = GetSyncTime(mouseName, mouseStatus, baseDirectory)
+
     % Set default base directory
-    baseDir = './data';
+    baseDir = baseDirectory;
     
-    % Construct file paths
-    gpioDir = fullfile(baseDir, [mouseName '_' mouseStatus '_gpio.csv']);
+    % Search for the last synctime_reviewed_*.csv files
+    reviewedSyncTimeDirs = dir(fullfile(baseDir, 'synctime_reviewed_*.csv'));
 
-    % Read the CSV file
-    gpioTable = readtable(gpioDir, "VariableNamingRule", "preserve");
-    gpioTableTime = table2array(gpioTable(:, 1));
-    gpioTableValue = table2array(gpioTable(:, 3));
-    
-    % Get GPIO-1 time and value data
-    gpioTime = gpioTableTime(strcmp(gpioTable.("Channel Name"), 'GPIO-1'), :);
-    gpioValue = gpioTableValue(strcmp(gpioTable.("Channel Name"), 'GPIO-1'), :);
+    % If no prior reviewed synctime files found, raise an error
+    if isempty(reviewedSyncTimeDirs)
+        error('No prior reviewed synctime files found... Please review the data first');
+    end
 
-    % GPIO value threshold
-    gpioThreshold = (max(gpioValue) + min(gpioValue)) / 2;
+    % Else, get the syncTime from the last reviewed synctime file
+    syncTime = GetSyncTimeFromReviewed(mouseName, mouseStatus, reviewedSyncTimeDirs);
+end
 
-    % Find the sync time
-    incValueTime = gpioTime(diff(gpioValue) > gpioThreshold);
-    incValueTimeGap = diff(incValueTime);
-    incValueTimeGapIndex = find((incValueTimeGap < 2.1) & (incValueTimeGap > 1.9), 1); % Find the first time gap around 2s
-    syncTime = incValueTime(incValueTimeGapIndex);
+%% Helper function to actually get syncTime if there is a reviewed synctime file
+function syncTime = GetSyncTimeFromReviewed(mouseName, mouseStatus, reviewedSyncTimeDirs)
 
-    % Plot the GPIO-1 signal (debugging)
-    figure
-    plot(gpioTime, gpioValue)
-    xlim([syncTime - 10, syncTime + 20])
-    hold on
-    yline(gpioThreshold, 'r--', 'threshold')
-    xline(syncTime, 'r-')
-    title('GPIO-1 Signal')
-    xlabel('Time (s)')
-    ylabel('Value')
-    hold off
+    % Get the last reviewed synctime file
+    reviewedSyncTimeLast = fullfile(reviewedSyncTimeDirs(end).folder, reviewedSyncTimeDirs(end).name);
+    disp(['Last reviewed synctime file found: ' reviewedSyncTimeLast]);
+
+    % Read the last reviewed synctime file
+    reviewedSyncTime = readtable(reviewedSyncTimeLast);
+
+    % Get the syncTime of the specified mouse and status
+    if strcmp(mouseStatus, 'B')
+        syncTime = reviewedSyncTime{strcmp(reviewedSyncTime.MouseName, mouseName), 'SyncTimeBaseReviewed'};
+    elseif strcmp(mouseStatus, 'P')
+        syncTime = reviewedSyncTime{strcmp(reviewedSyncTime.MouseName, mouseName), 'SyncTimeParkReviewed'};
+    end
 end
