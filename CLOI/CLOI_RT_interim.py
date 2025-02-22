@@ -1,30 +1,40 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Count clustered "ON" states
-def count_clustered_ons(laser_states):
-    clustered_on_count = 0
+session_dir = "F:\ChAT_947-2_Parkinson_CLOI_250213_162451"
+log_laser_dir = session_dir + "/Log/log_laser_" + session_dir[-13:] + ".csv"
+
+log_laser = pd.read_csv(log_laser_dir, sep=",", header=None, names=["Time", "ExpTime", "LaserState"])
+expTime = log_laser["ExpTime"]
+laserState = log_laser["LaserState"]
+
+# Function to count clustered ONs
+def count_clustered_ons(laser_state):
+    count = 0
     previous_state = "OFF"
-    for state in laser_states:
+    for state in laser_state:
         if state == "ON" and previous_state == "OFF":
-            clustered_on_count += 1
+            count += 1
         previous_state = state
-    return clustered_on_count
+    return count
 
-def MS_clustered_ons(session_dir):
-    log_laser_dir = session_dir + "/Log/log_laser_" + session_dir[-13:] + ".csv"
-    log_laser = pd.read_csv(log_laser_dir, sep = ",", header = None, names = ["Time", "ExpTime", "LaserState"])
-    expTime = log_laser["ExpTime"]
-    laserState = log_laser["LaserState"]
+num_on = count_clustered_ons(laserState)
+print(f"Number of 'ON's: {num_on}")
 
-    sessions = {
-        "session_2": (110, 250),
-        "session_4": (350, 490),
-        "session_6": (590, 730)
-    }
+session_2_on = count_clustered_ons(laserState[(expTime >= 110) & (expTime <= 250)])
+session_4_on = count_clustered_ons(laserState[(expTime >= 350) & (expTime <= 490)])
+session_6_on = count_clustered_ons(laserState[(expTime >= 590) & (expTime <= 730)])
 
-    counts = []
-    for session, (start, end) in sessions.items():
-        session_laser_states = log_laser[(expTime >= start) & (expTime <= end)]["LaserState"]
-        clustered_on_count = count_clustered_ons(session_laser_states)
-        counts.append(clustered_on_count)
-    return tuple(counts)
+print(f"Number of 'ON's in session 2: {session_2_on}")
+print(f"Number of 'ON's in session 4: {session_4_on}")
+print(f"Number of 'ON's in session 6: {session_6_on}")
+
+print(laserState)
+
+plt.figure(figsize=(10, 6))
+plt.plot(log_laser["ExpTime"], log_laser["LaserState"], marker='o')
+plt.xlabel("ExpTime")
+plt.ylabel("LaserState")
+plt.title("ExpTime vs LaserState")
+plt.grid(True)
+plt.show()

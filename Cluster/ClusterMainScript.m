@@ -19,7 +19,7 @@ MOUSENAME = 'ChAT_514-2-3';
 MOUSESTATUS = 'B';
 
 % cellSignalPark = GetCellSignal(MOUSENAME, MOUSESTATUS, baseDir);
-% [cellNamesPaired, signalPairedBase, signalPairedPark] = GetPairSignals(MOUSENAME, baseDir);
+[cellNamesPaired, signalPairedBase, signalPairedPark] = GetPairSignals(MOUSENAME, baseDir);
 
 % syncTimePark = GetSyncTime(MOUSENAME, MOUSESTATUS, baseDir);
 % ReviewSyncTime(baseDir);
@@ -28,7 +28,7 @@ MOUSESTATUS = 'B';
 
 % dlcCenter = GetDLCCoord(MOUSENAME, MOUSESTATUS, 'center', baseDir);
 
-reviewedVideo = ReviewRawVideo(MOUSENAME, MOUSESTATUS, videoDir, false)
+% reviewedVideo = ReviewRawVideo(MOUSENAME, MOUSESTATUS, videoDir, false)
 
 %ReviewSyncFrame(baseDir, videoDir);
 

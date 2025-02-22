@@ -9,21 +9,15 @@ import csv
 from datetime import datetime
 import random
 
-import CLOI_RT_interim
+# N1 = 34; N2 = 56; N3 = 39
+N1 = 61; N2 = 59; N3 = 38
 
 ################################################################################
 # File I/O and Session Setup
 ################################################################################
 # Create session directory: ./YYMMDD_HHMMSS
-session_dir = "C:/Users/LuckyFace/Videos" + datetime.now().strftime("/%y%m%d_%H%M%S")
+session_dir = r"C:\Users\Jung Lab 2\Videos" + datetime.now().strftime("/%y%m%d_%H%M%S")
 os.makedirs(session_dir, exist_ok=True)
-
-# Count clustered "ON" states from previous session
-################################################################################
-################################################################################
-N1, N2, N3 = CLOI_RT_interim.MS_clustered_ons("E:/ChAT_947-3_Baseline_Random_250110_133139")
-################################################################################
-################################################################################
 
 # Video output file path
 output_path = os.path.join(session_dir, "output_video.mp4")
@@ -51,7 +45,7 @@ if not os.path.exists(log_ledsync):
 ################################################################################
 # Webcam Capture Initialization
 ################################################################################
-cap = cv2.VideoCapture(1)  # Change to 0 if your default webcam is index 0
+cap = cv2.VideoCapture(0)  # Change to 0 if your default webcam is index 0
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
@@ -91,6 +85,10 @@ mini_sessions = [
 ]
 total_mini_sessions = len(mini_sessions)  # = 6
 current_mini_idx = 0  # Tracks which mini-session we're in
+current_session_label = "CLOI OFF"
+
+# Dark/darker region detection thresholds
+MIN_CIRCULARITY = 0.45  # For "darker" region
 
 ################################################################################
 # Dynamic Thresholding Trackbars
@@ -102,9 +100,6 @@ thres_darker_px = 25     # Threshold for 'darker' region (0-50)
 thres_dark_area = 500    # Min area for dark contour
 thres_darker_area = 800  # Min area for 'darker' region
 
-# Dark/darker region detection thresholds
-MIN_CIRCULARITY = 0.45  # For "darker" region
-
 # Will be updated after ROI is defined
 movement_threshold = 0.1  # in pixels
 selected_circle = ((0, 0), 100)  # (center=(0,0), radius=100) default
@@ -112,7 +107,6 @@ selected_circle = ((0, 0), 100)  # (center=(0,0), radius=100) default
 def update_thresholds(x):
     global thres_time, thres_movement, movement_threshold
     global thres_dark_px, thres_darker_px, thres_dark_area, thres_darker_area
-    global MIN_CIRCULARITY
 
     thres_time = cv2.getTrackbarPos("Time (ms)", "Thresholds") / 1000
     thres_movement = cv2.getTrackbarPos("Movement", "Thresholds") / 100
@@ -121,7 +115,6 @@ def update_thresholds(x):
     thres_darker_px = cv2.getTrackbarPos("Darkr Px", "Thresholds")
     thres_dark_area = cv2.getTrackbarPos("Dark Area", "Thresholds")
     thres_darker_area = cv2.getTrackbarPos("Darkr Area", "Thresholds")
-    MIN_CIRCULARITY = cv2.getTrackbarPos("Circularity", "Thresholds")
 
 cv2.namedWindow("Thresholds", flags=cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Thresholds", 640, 240)
@@ -131,7 +124,6 @@ cv2.createTrackbar("Dark Px", "Thresholds", thres_dark_px, 100, update_threshold
 cv2.createTrackbar("Darkr Px", "Thresholds", thres_darker_px, 50, update_thresholds)
 cv2.createTrackbar("Dark Area", "Thresholds", thres_dark_area, 1000, update_thresholds)
 cv2.createTrackbar("Darkr Area", "Thresholds", thres_darker_area, 1000, update_thresholds)
-cv2.createTrackbar("Circularity", "Thresholds", int(MIN_CIRCULARITY * 100), 100, update_thresholds)
 
 ################################################################################
 # ROI Definition (3 points -> circle)
@@ -275,7 +267,7 @@ initial_time = datetime.now()
 laser.value = False
 
 # Movement log
-movement_data = [[initial_time, 0, "Stop"]]
+movement_data = [[initial_time, 0, "Stop", 0, 0]]
 laser_data = [[initial_time, 0, "OFF"]]
 ledsync_data = [[initial_time, 0, "OFF"]]
 
@@ -287,10 +279,10 @@ MOVE_MEMORY_SEC = 0.1
 last_move_time = None
 
 interval_time = 120.0 # seconds
-
-random_interval_1 = generate_intervals(interval_time, N1)
-random_interval_2 = generate_intervals(interval_time, N2)
-random_interval_3 = generate_intervals(interval_time, N3)
+N_avg = round((N1+N2+N3)/3)
+random_interval_1 = generate_intervals(interval_time, N_avg)
+random_interval_2 = generate_intervals(interval_time, N_avg)
+random_interval_3 = generate_intervals(interval_time, N_avg)
 
 # Concatenate random intervals with adjusted times
 adjusted_intervals_1 = [(start + interval_time * 1, end + interval_time * 1) for start, end in random_interval_1]
@@ -494,7 +486,7 @@ while True:
         cv2.circle(frame, (hx, hy), 2, (0, 0, 255), -1)
 
     # Log movement
-    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state])
+    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state, cX, cY])
 
     # Laser control
     control_laser(state)

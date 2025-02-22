@@ -15,9 +15,9 @@ function dlcArray = GetDLCCoord(mouseName, mouseStatus, mousePart, baseDirectory
     dlcArray = table2array(readtable(dlcFile));
     
     % Extract the DLC coordinate data
-    dlcArrayHead = dlcArray(:, [1, 2:4]);
-    dlcArrayCent = dlcArray(:, [1, 5:7]);
-    dlcArrayTail = dlcArray(:, [1, 8:10]);
+    dlcArrayHead = dlcArray(:, [1, 2:3]);
+    dlcArrayCent = dlcArray(:, [1, 5:6]);
+    dlcArrayTail = dlcArray(:, [1, 8:9]);
 
     % Extract the DLC coordinate data for the specified mouse part
     switch mousePart

@@ -12,7 +12,7 @@ from datetime import datetime
 # File I/O and Session Setup
 ################################################################################
 # Create session directory: ./YYMMDD_HHMMSS
-session_dir = r"C:\Users\Jung Lab 2\Videos" + datetime.now().strftime("/%y%m%d_%H%M%S")
+session_dir = "C:/Users/LuckyFace/Videos" + datetime.now().strftime("/%y%m%d_%H%M%S")
 os.makedirs(session_dir, exist_ok=True)
 
 # Video output file path
@@ -41,7 +41,7 @@ if not os.path.exists(log_ledsync):
 ################################################################################
 # Webcam Capture Initialization
 ################################################################################
-cap = cv2.VideoCapture(0) # Change to 0 if your default webcam is index 0
+cap = cv2.VideoCapture(1)  # Change to 0 if your default webcam is index 0
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
@@ -53,7 +53,7 @@ fps = cap.get(cv2.CAP_PROP_FPS) or 30
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Grab one frame to initialize      
+# Grab one frame to initialize
 ret, first_frame = cap.read()
 if not ret:
     print("Error: Could not read from webcam.")
@@ -276,7 +276,7 @@ initial_time = datetime.now()
 laser.value = False
 
 # Movement log
-movement_data = [[initial_time, 0, "Stop", 0, 0]]
+movement_data = [[initial_time, 0, "Stop"]]
 laser_data = [[initial_time, 0, "OFF"]]
 ledsync_data = [[initial_time, 0, "OFF"]]
 
@@ -485,7 +485,7 @@ while True:
         cv2.circle(frame, (hx, hy), 2, (0, 0, 255), -1)
 
     # Log movement
-    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state, cX, cY])
+    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state])
 
     # Laser control
     control_laser(state)

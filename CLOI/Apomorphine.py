@@ -1,253 +1,52 @@
 import os
-os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
-
-import cv2
 import numpy as np
 import digitalio
 import board
-import csv
 from datetime import datetime
-
-################################################################################
-# File I/O and Session Setup
-################################################################################
-# Create session directory: ./YYMMDD_HHMMSS
-session_dir = r"C:\Users\Jung Lab 2\Videos" + datetime.now().strftime("/%y%m%d_%H%M%S")
-os.makedirs(session_dir, exist_ok=True)
-
-# Video output file path
-output_path = os.path.join(session_dir, "output_video.mp4")
-output_path_raw = os.path.join(session_dir, "output_video_raw.mp4")
-
-# Create session log directory: ./YYMMDD_HHMMSS/Log
-log_dir = os.path.join(session_dir, "Log")
-os.makedirs(log_dir, exist_ok=True)
-
-# Movement log file path, create if not exists
-log_movement = os.path.join(log_dir, "log_movement_" + datetime.now().strftime("%y%m%d_%H%M%S") + ".csv")
-if not os.path.exists(log_movement):
-    open(log_movement, "x")
-
-# Laser log file path, create if not exists
-log_laser = os.path.join(log_dir, "log_laser_" + datetime.now().strftime("%y%m%d_%H%M%S") + ".csv")
-if not os.path.exists(log_laser):
-    open(log_laser, "x")
-
-# LED sync log file path, create if not exists
-log_ledsync = os.path.join(log_dir, "log_ledsync_" + datetime.now().strftime("%y%m%d_%H%M%S") + ".csv")
-if not os.path.exists(log_ledsync):
-    open(log_ledsync, "x")
-
-################################################################################
-# Webcam Capture Initialization
-################################################################################
-cap = cv2.VideoCapture(0) # Change to 0 if your default webcam is index 0
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-
-if not cap.isOpened():
-    print("Error: Could not access the webcam.")
-    exit()
-
-fps = cap.get(cv2.CAP_PROP_FPS) or 30
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-# Grab one frame to initialize      
-ret, first_frame = cap.read()
-if not ret:
-    print("Error: Could not read from webcam.")
-    exit()
-
-################################################################################
-# Video Writer Initialization
-################################################################################
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-fourcc2 = cv2.VideoWriter_fourcc(*'mp4v')
-out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-out2 = cv2.VideoWriter(output_path_raw, fourcc2, fps, (width, height))
 
 ################################################################################
 # Mini-Session Setup
 ################################################################################
-# 6 mini-sessions, each 2 minutes (120s) => total 12 minutes
+# 5 mini-sessions, each 2 minutes (120s) => total 10 minutes
 mini_sessions = [
-    ("CLOI OFF", 120),
-    ("CLOI ON",  120),
-    ("CLOI OFF", 120),
-    ("CLOI ON",  120),
-    ("CLOI OFF", 120),
-    ("CLOI ON",  120),
+    ("Laser OFF", 120),
+    ("Laser ON",  120),
+    ("Laser OFF", 120),
+    ("Laser ON",  120),
+    ("Laser OFF", 120),
 ]
-total_mini_sessions = len(mini_sessions)  # = 6
+total_mini_sessions = len(mini_sessions)  # = 5
 current_mini_idx = 0  # Tracks which mini-session we're in
-
-################################################################################
-# Dynamic Thresholding Trackbars
-################################################################################
-thres_time = 0.1         # Time interval for movement evaluation (seconds)
-thres_movement = 0.1     # Movement threshold (ratio relative to circle radius)
-thres_dark_px = 50       # Threshold for 'dark' pixels (0-100)
-thres_darker_px = 25     # Threshold for 'darker' region (0-50)
-thres_dark_area = 500    # Min area for dark contour
-thres_darker_area = 800  # Min area for 'darker' region
-
-# Will be updated after ROI is defined
-movement_threshold = 0.1  # in pixels
-selected_circle = ((0, 0), 100)  # (center=(0,0), radius=100) default
-
-def update_thresholds(x):
-    global thres_time, thres_movement, movement_threshold
-    global thres_dark_px, thres_darker_px, thres_dark_area, thres_darker_area
-
-    thres_time = cv2.getTrackbarPos("Time (ms)", "Thresholds") / 1000
-    thres_movement = cv2.getTrackbarPos("Movement", "Thresholds") / 100
-    movement_threshold = thres_movement * selected_circle[1]
-    thres_dark_px = cv2.getTrackbarPos("Dark Px", "Thresholds")
-    thres_darker_px = cv2.getTrackbarPos("Darkr Px", "Thresholds")
-    thres_dark_area = cv2.getTrackbarPos("Dark Area", "Thresholds")
-    thres_darker_area = cv2.getTrackbarPos("Darkr Area", "Thresholds")
-
-cv2.namedWindow("Thresholds", flags=cv2.WINDOW_NORMAL)
-cv2.resizeWindow("Thresholds", 640, 240)
-cv2.createTrackbar("Time (ms)", "Thresholds", int(thres_time * 1000), 1000, update_thresholds)
-cv2.createTrackbar("Movement", "Thresholds", int(thres_movement * 100), 100, update_thresholds)
-cv2.createTrackbar("Dark Px", "Thresholds", thres_dark_px, 100, update_thresholds)
-cv2.createTrackbar("Darkr Px", "Thresholds", thres_darker_px, 50, update_thresholds)
-cv2.createTrackbar("Dark Area", "Thresholds", thres_dark_area, 1000, update_thresholds)
-cv2.createTrackbar("Darkr Area", "Thresholds", thres_darker_area, 1000, update_thresholds)
-
-################################################################################
-# ROI Definition (3 points -> circle)
-################################################################################
-def calculate_circle(pts):
-    """Return (center, radius) for a circle through 3 points, or None if collinear."""
-    x1, y1 = pts[0]
-    x2, y2 = pts[1]
-    x3, y3 = pts[2]
-    det = (x1 - x2) * (y2 - y3) - (x2 - x3) * (y1 - y2)
-    if abs(det) < 1e-10:
-        print("Error: The 3 points are collinear; cannot define a circle.")
-        return None
-    A = (x1**2 + y1**2)
-    B = (x2**2 + y2**2)
-    C = (x3**2 + y3**2)
-    xc = ((A * (y2 - y3)) + (B * (y3 - y1)) + (C * (y1 - y2))) / (2 * det)
-    yc = ((A * (x3 - x2)) + (B * (x1 - x3)) + (C * (x2 - x1))) / (2 * det)
-    r = np.sqrt((xc - x1)**2 + (yc - y1)**2)
-    return (int(xc), int(yc)), int(r)
-
-def apply_circle_mask(frame, center, radius):
-    """Return a masked copy of frame within circle (center,radius)."""
-    mask = np.zeros(frame.shape[:2], dtype=np.uint8)
-    cv2.circle(mask, center, radius, 255, -1)
-    return cv2.bitwise_and(frame, frame, mask=mask)
-
-points = []
-def mouse_callback(event, x, y, flags, param):
-    global points, selected_circle, movement_threshold
-    if event == cv2.EVENT_LBUTTONDOWN:
-        points.append((x, y))
-        if len(points) == 3:
-            circle_data = calculate_circle(points)
-            if circle_data:
-                selected_circle = circle_data
-                center, rad = selected_circle
-                movement_threshold = thres_movement * rad
-                print(f"Circle Center: {center}, Radius: {rad}, MovementThresh: {movement_threshold:.2f}")
-            points = []
-
-cv2.namedWindow("Define ROI")
-cv2.resizeWindow("Define ROI", width, height)
-cv2.setMouseCallback("Define ROI", mouse_callback)
-
-# We'll temporarily display "first_frame" so user can click 3 points
-while True:
-    temp_frame = first_frame.copy()
-    for pt in points:
-        cv2.circle(temp_frame, pt, 5, (0, 255, 0), -1)
-    if selected_circle[0] != (0, 0):
-        c, r = selected_circle
-        cv2.circle(temp_frame, c, r, (255, 0, 0), 2)
-    cv2.imshow("Define ROI", temp_frame)
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):
-        break
-    if selected_circle[0] != (0, 0):
-        break
-cv2.destroyWindow("Define ROI")
-
-def apply_circle_mask_to_box(box_region, center, radius, box_offset):
-    """
-    Mask a bounding-box sub-image to the same circle, offset by (box_offset).
-    """
-    mask = np.zeros(box_region.shape[:2], dtype=np.uint8)
-    offset_center = (center[0] - box_offset[0], center[1] - box_offset[1])
-    cv2.circle(mask, offset_center, radius, 255, -1)
-    return cv2.bitwise_and(box_region, box_region, mask=mask)
+current_session_label = "Laser OFF"
 
 ################################################################################
 # Laser Control Setup (hardware-based)
 ################################################################################
 laser = digitalio.DigitalInOut(board.C0)
-led = digitalio.DigitalInOut(board.C1)
 laser.direction = digitalio.Direction.OUTPUT
-led.direction = digitalio.Direction.OUTPUT
 laser.status = False
 laser_status = "OFF"
-laser_ON_last = None
-
-# We'll record the last time we turned laser OFF
-laser_OFF_last = datetime.now()
-
-# X seconds ON, Y seconds OFF if the state is "Stop" (example logic)
-X = 0.5  # Laser ON duration (s)
-Y = 1.0  # Laser OFF duration (s)
 
 def control_laser(status):
     """
-    If status == "Stop", we toggle laser in an ON->OFF->ON cycle (X seconds ON, Y seconds OFF).
-    If status == "Move", do nothing (remain OFF).
-    Adjust this to your needs or integrate with 'CLOI ON/OFF' if you want to override.
+    If mini_session == "Laser OFF", we toggle laser OFF.
+    If mini_session == "Laser ON", we toggle laser ON.
     """
-    global laser, laser_status, laser_data, laser_ON_last, laser_OFF_last, current_session_label, initial_time
+    global laser, laser_status, current_session_label
     current_time = datetime.now()
 
-    if current_session_label == "CLOI ON":
-        # If never turned on & status is "Stop", start ON
-        if status == "Stop" and laser_ON_last is None:
+    if current_session_label == "Laser ON":
+        # If current time is inside random_intervals
+        if any(lower <= (current_time - initial_time).total_seconds() <= lower + 0.500 for lower, _ in random_intervals):
             laser.value = True
             laser_status = "ON"
-            laser_ON_last = current_time
             laser_data.append([current_time, (current_time - initial_time).total_seconds(), laser_status])
-            return
-        # If never turned on & status is "Move", do nothing
-        elif status == "Move" and laser_ON_last is None:
-            return
-
-        elapsed_ms = (current_time - laser_ON_last).total_seconds() * 1000 if laser_ON_last else 0
-
-        # Within ON window
-        if elapsed_ms < (X * 1000):
-            if laser_status == "OFF":
-                laser.value = True
-                laser_status = "ON"
-            return
-        # Between X and X+Y => OFF
-        elif (X * 1000) <= elapsed_ms < ((X + Y) * 1000):
-            if laser_status == "ON":
-                laser.value = False
-                laser_status = "OFF"
-                laser_OFF_last = current_time
-                laser_data.append([current_time, (current_time - initial_time).total_seconds(), laser_status])
-            return
-        # Past X+Y => repeat if still "Stop"
-        elif status == "Stop" and elapsed_ms >= ((X + Y) * 1000):
-            laser.value = True
-            laser_status = "ON"
             laser_ON_last = current_time
+        else:
+            laser.value = False
+            laser_status = "OFF"
             laser_data.append([current_time, (current_time - initial_time).total_seconds(), laser_status])
-            return
+            laser_OFF_last = current_time
     else:
         laser.value = False
         laser_status = "OFF"
@@ -258,17 +57,6 @@ def control_laser(status):
             return
 
 ################################################################################
-# Helper Functions
-################################################################################
-def contour_circularity(contour):
-    """Circularity = 4π * area / perimeter^2."""
-    area = cv2.contourArea(contour)
-    perimeter = cv2.arcLength(contour, True)
-    if perimeter == 0:
-        return 0
-    return (4.0 * np.pi * area) / (perimeter * perimeter)
-
-################################################################################
 # Initialize Data Before Main Loop
 ################################################################################
 
@@ -276,7 +64,7 @@ initial_time = datetime.now()
 laser.value = False
 
 # Movement log
-movement_data = [[initial_time, 0, "Stop", 0, 0]]
+movement_data = [[initial_time, 0, "Stop"]]
 laser_data = [[initial_time, 0, "OFF"]]
 ledsync_data = [[initial_time, 0, "OFF"]]
 
@@ -287,8 +75,24 @@ centroid_history = []
 MOVE_MEMORY_SEC = 0.1
 last_move_time = None
 
-# Dark/darker region detection thresholds
-MIN_CIRCULARITY = 0.4  # For "darker" region
+interval_time = 120.0 # seconds
+# ChAT_947-1
+# N1 = 59; N2 = 64; N3 = 56
+# ChAT_947-2
+#N1 = 61; N2 = 66; N3 = 56
+# ChAT_947-3
+N1 = 60; N2 = 57; N3 = 61
+N_avg = round((N1+N2+N3)/3)
+random_interval_1 = generate_intervals(interval_time, N_avg)
+random_interval_2 = generate_intervals(interval_time, N_avg)
+random_interval_3 = generate_intervals(interval_time, N_avg)
+
+# Concatenate random intervals with adjusted times
+adjusted_intervals_1 = [(start + interval_time * 1, end + interval_time * 1) for start, end in random_interval_1]
+adjusted_intervals_2 = [(start + interval_time * 3, end + interval_time * 3) for start, end in random_interval_2]
+adjusted_intervals_3 = [(start + interval_time * 5, end + interval_time * 5) for start, end in random_interval_3]
+
+random_intervals = adjusted_intervals_1 + adjusted_intervals_2 + adjusted_intervals_3
 
 ################################################################################
 # Blink 5 times before main loop
@@ -306,7 +110,7 @@ while (datetime.now() - initial_time).total_seconds() < 10:
 # Main Loop
 ################################################################################
 
-window_name = "Closed Loop Optogenetic Inhibition (real-time) by CHJ"
+window_name = "Closed Loop Optogenetic Inhibition (real-time) by CHJ - RANDOM Inhibition"
 cv2.namedWindow(window_name, flags=cv2.WINDOW_NORMAL)
 cv2.resizeWindow(window_name, round(width/2), round(height/2))
 
@@ -485,7 +289,7 @@ while True:
         cv2.circle(frame, (hx, hy), 2, (0, 0, 255), -1)
 
     # Log movement
-    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state, cX, cY])
+    movement_data.append([current_time, (current_time - initial_time).total_seconds(), state])
 
     # Laser control
     control_laser(state)
@@ -503,7 +307,7 @@ while True:
     if state == "Move":
         text_color = (0, 0, 0)  # black
     else:
-        text_color = (0, 0, 255)  # red
+        text_color = (0, 0, 0)  # black
         cv2.putText(frame, f"Movement: {state}",
                     (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1.2, text_color, 2)
 
