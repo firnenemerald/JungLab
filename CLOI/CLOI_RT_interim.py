@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-session_dir = "F:\ChAT_947-2_Parkinson_CLOI_250213_162451"
+session_dir = r"F:\ChAT_967-2_Baseline_Random_250228_141631"
 log_laser_dir = session_dir + "/Log/log_laser_" + session_dir[-13:] + ".csv"
 
 log_laser = pd.read_csv(log_laser_dir, sep=",", header=None, names=["Time", "ExpTime", "LaserState"])

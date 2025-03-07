@@ -11,7 +11,7 @@ from datetime import datetime
 
 ## File I/O
 # Input video path
-video_path = "C:\\Users\\chanh\\Downloads\\Video_ChAT\\ChAT_925-2_24-07-18-13-56-02_OF.mp4"  # Video file path
+video_path = "C:\\Users\\LuckyFace\\Documents\\CHJ\\ChAT_925-3_24-08-08-12-03-46_OF.mp4"  # Video file path
 # Make a session directory ./YYMMDD_HHMMSS
 session_dir = datetime.now().strftime("./%y%m%d_%H%M%S")
 if not os.path.exists(session_dir):
@@ -197,8 +197,8 @@ def control_laser(status):
 
 ## Main loop for real-time processing
 
-cv2.namedWindow("ROI", flags=cv2.WINDOW_NORMAL)
-cv2.resizeWindow("ROI", round(width/2), round(height/2))
+cv2.namedWindow("GrayDarkDarker", flags=cv2.WINDOW_NORMAL)
+cv2.resizeWindow("GrayDarkDarker", round(width/2), round(height/2))
 
 previous_darker_contour = None  # Initialize previous darker contour
 state = "Stop"  # Initialize state
@@ -342,7 +342,7 @@ while cap.isOpened():
 
     # Display dark frames
     if largest_dark_contour is not None:
-        cv2.imshow("ROI", dark_contour_frame)
+        cv2.imshow("GrayDarkDarker", dark_contour_frame)
     # Display the frame
     cv2.imshow("Closed Loop Optogenetic Inhibition (real-time) by CHJ", frame)
 

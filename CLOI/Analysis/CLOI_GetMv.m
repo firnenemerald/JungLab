@@ -11,17 +11,16 @@ function [mvArrayTime, mvArrayState] = CLOI_GetMv(mouseName, mouseStatus, expTyp
     % Set default base directory
     baseDir = baseDirectory;
     % Construct session name
-    sessionName = [mouseName '_' mouseStatus '_' expType '_' dateTime];
-    % Construct movement csv file directory
-    directoryName = fullfile(baseDir, sessionName, 'Log');
+    sessionName = mouseName + "_" + mouseStatus + "_" + expType + "_" + dateTime;
     
     % Find movement csv file inside directory
-    mvFileDir = dir(fullfile(directoryName, 'log_movement_*.csv'));
-    mvFile = fullfile(directoryName, mvFileDir.name);
+    mvFileDir = dir(fullfile(baseDir, mouseName, sessionName, 'Log', 'log_movement_*.csv'));
+    mvFile = fullfile(baseDir, mouseName, sessionName, 'Log', mvFileDir.name);
 
     % Read the csv file
-    mvArrayTime = table2array(readtable(mvFile, "Range", 2));
-    mvArrayState = table2array(readtable(mvFile, "Range", 3));
+    mvArray = readtable(mvFile, "Range", 2);
 
-    % Combine the time and movement data
+    % Extract the movement data
+    mvArrayTime = table2array(mvArray(:, 2));
+    mvArrayState = table2array(mvArray(:, 3));
 end

@@ -11,13 +11,11 @@ function dlcArray = CLOI_GetDLC(mouseName, mouseStatus, expType, dateTime, mouse
     % Set default base directory
     baseDir = baseDirectory;
     % Construct session name
-    sessionName = [mouseName '_' mouseStatus '_' expType '_' dateTime];
-    % Construct DLC csv file directory
-    directoryName = fullfile(baseDir, sessionName);
+    sessionName = mouseName + "_" + mouseStatus + "_" + expType + "_" + dateTime;
     
     % Find DLC csv file inside directory
-    dlcFileDir = dir(fullfile(directoryName, '*.csv'));
-    dlcFile = fullfile(directoryName, dlcFileDir.name);
+    dlcFileDir = dir(fullfile(baseDir, mouseName, sessionName, '*.csv'));
+    dlcFile = fullfile(baseDir, mouseName, sessionName, dlcFileDir.name);
 
     % Read the csv file
     dlcArray = table2array(readtable(dlcFile, "VariableNamingRule", "preserve"));
