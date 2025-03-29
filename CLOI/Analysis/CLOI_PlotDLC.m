@@ -77,8 +77,9 @@ function CLOI_PlotDLC(mouseName, mouseStatus, expType, dateTime, mousePart, defa
         dist23 = sqrt(diff(dlcArray23(:, 2)).^2 + diff(dlcArray23(:, 3)).^2);
 
         % Print the movement distance
-        fprintf('%.2f,%.2f,%.2f,%.2f,%.2f,%.2f', sum(dist11), sum(dist21), sum(dist12), sum(dist22), sum(dist13), sum(dist23));
-
+        disp(strcat(mouseStatus, " ", expType, " ", dateTime));
+        fprintf('%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n', sum(dist11), sum(dist21), sum(dist12), sum(dist22), sum(dist13), sum(dist23));
+        
         % Plot DLC XY data
         figure;
         hold on;
