@@ -14,7 +14,7 @@ function dlcArray = CLOI_GetDLC(mouseName, mouseStatus, expType, dateTime, mouse
     sessionName = mouseName + "_" + mouseStatus + "_" + expType + "_" + dateTime;
     
     % Find DLC csv file inside directory
-    dlcFileDir = dir(fullfile(baseDir, mouseName, sessionName, '*.csv'));
+    dlcFileDir = dir(fullfile(baseDir, mouseName, sessionName, sessionName + "*.csv"));
     dlcFile = fullfile(baseDir, mouseName, sessionName, dlcFileDir.name);
 
     % Read the csv file
