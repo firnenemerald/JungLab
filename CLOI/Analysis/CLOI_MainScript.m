@@ -8,69 +8,57 @@
 clear
 close all
 
-%% Get CLOI data and save to .mat file
+% Get CLOI data and save to .mat file
 
-% % Specify default directory and mouse names
-% defaultDir = "D:/CLOI_data";
-% mouseNames = ["ChAT_947-2", "ChAT_947-3"];
+% Specify default directory and mouse names
+defaultDir = "D:/CLOI_data";
+mouseNames = ["ChAT_947-2", "ChAT_947-3"];
 
-% % Get the list of session folders for all mice
-% sessionNames = cell(length(mouseNames)*12, 2);
-% for mouseIdx = 1:length(mouseNames)
-%     mouseName = mouseNames(mouseIdx);
-%     sessionFolderDir = dir(defaultDir + "/" + mouseName);
-%     sessionFolderNames = {sessionFolderDir([sessionFolderDir.isdir] & ~ismember({sessionFolderDir.name}, {'.', '..'})).name};
-%     sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 1) = {mouseName};
-%     sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 2) = sessionFolderNames;
-% end
+% Get the list of session folders for all mice
+sessionNames = cell(length(mouseNames)*12, 2);
+for mouseIdx = 1:length(mouseNames)
+    mouseName = mouseNames(mouseIdx);
+    sessionFolderDir = dir(defaultDir + "/" + mouseName);
+    sessionFolderNames = {sessionFolderDir([sessionFolderDir.isdir] & ~ismember({sessionFolderDir.name}, {'.', '..'})).name};
+    sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 1) = {mouseName};
+    sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 2) = sessionFolderNames;
+end
 
-% % Iterate for each session and get DLC, movement data
-% sessionData = cell(length(sessionNames), 20);
-% for sessionIdx = 1:length(sessionNames)
-%     mouseName = sessionNames{sessionIdx, 1};
-%     sessionName = sessionNames{sessionIdx, 2};
+% Iterate for each session and get DLC, movement data
+sessionData = cell(length(sessionNames), 20);
+for sessionIdx = 1:length(sessionNames)
+    mouseName = sessionNames{sessionIdx, 1};
+    sessionName = sessionNames{sessionIdx, 2};
 
-%     % Deconstruct mouse data from session name
-%     splitParts = split(sessionName, "_");
-%     mouseStatus = splitParts{3} + "";
-%     expType = splitParts{4} + "";
-%     dateTime = splitParts{5} + "_" + splitParts{6};
+    % Deconstruct mouse data from session name
+    splitParts = split(sessionName, "_");
+    mouseStatus = splitParts{3} + "";
+    expType = splitParts{4} + "";
+    dateTime = splitParts{5} + "_" + splitParts{6};
 
-%     % Load DLC data
-%     dlcArray = CLOI_GetDLC(mouseName, mouseStatus, expType, dateTime, "head", defaultDir);
+    % Load DLC data
+    dlcArray = CLOI_GetDLC(mouseName, mouseStatus, expType, dateTime, "head", defaultDir);
     
-%     % Load movement data
-%     [mvArrayTime, mvArrayState] = CLOI_GetMv(mouseName, mouseStatus, expType, dateTime, defaultDir);
+    % Load movement data
+    [mvArrayTime, mvArrayState] = CLOI_GetMv(mouseName, mouseStatus, expType, dateTime, defaultDir);
 
-%     % Get minisession (ms) frames
-%     OFFframebool_ms1 = (mvArrayTime > 10.0 & mvArrayTime < 120.0);
-%     OFFframebool_ms3 = (mvArrayTime >= 240.0 & mvArrayTime < 360.0);
-%     OFFframebool_ms5 = (mvArrayTime >= 480.0 & mvArrayTime < 600.0);
-%     ONframebool_ms2 = (mvArrayTime >= 120.0 & mvArrayTime < 240.0);
-%     ONframebool_ms4 = (mvArrayTime >= 360.0 & mvArrayTime < 480.0);
-%     ONframebool_ms6 = (mvArrayTime >= 600.0 & mvArrayTime < 720.0);
+    % Get minisession (ms) frames
+    OFFframebool_ms1 = (mvArrayTime > 10.0 & mvArrayTime < 120.0);
+    OFFframebool_ms3 = (mvArrayTime >= 240.0 & mvArrayTime < 360.0);
+    OFFframebool_ms5 = (mvArrayTime >= 480.0 & mvArrayTime < 600.0);
+    ONframebool_ms2 = (mvArrayTime >= 120.0 & mvArrayTime < 240.0);
+    ONframebool_ms4 = (mvArrayTime >= 360.0 & mvArrayTime < 480.0);
+    ONframebool_ms6 = (mvArrayTime >= 600.0 & mvArrayTime < 720.0);
+    framesList = [OFFframebool_ms1, ONframebool_ms2, OFFframebool_ms3, ONframebool_ms4, OFFframebool_ms5, ONframebool_ms6];
 
-%     sessionData(sessionIdx, 1) = {mouseName};
-%     sessionData(sessionIdx, 2) = {sessionName};
-%     sessionData(sessionIdx, 3) = {mvArrayTime(OFFframebool_ms1, :)};
-%     sessionData(sessionIdx, 4) = {mvArrayState(OFFframebool_ms1, :)};
-%     sessionData(sessionIdx, 5) = {dlcArray(OFFframebool_ms1, :)};
-%     sessionData(sessionIdx, 6) = {mvArrayTime(ONframebool_ms2, :)};
-%     sessionData(sessionIdx, 7) = {mvArrayState(ONframebool_ms2, :)};
-%     sessionData(sessionIdx, 8) = {dlcArray(ONframebool_ms2, :)};
-%     sessionData(sessionIdx, 9) = {mvArrayTime(OFFframebool_ms3, :)};
-%     sessionData(sessionIdx, 10) = {mvArrayState(OFFframebool_ms3, :)};
-%     sessionData(sessionIdx, 11) = {dlcArray(OFFframebool_ms3, :)};
-%     sessionData(sessionIdx, 12) = {mvArrayTime(ONframebool_ms4, :)};
-%     sessionData(sessionIdx, 13) = {mvArrayState(ONframebool_ms4, :)};
-%     sessionData(sessionIdx, 14) = {dlcArray(ONframebool_ms4, :)};
-%     sessionData(sessionIdx, 15) = {mvArrayTime(OFFframebool_ms5, :)};
-%     sessionData(sessionIdx, 16) = {mvArrayState(OFFframebool_ms5, :)};
-%     sessionData(sessionIdx, 17) = {dlcArray(OFFframebool_ms5, :)};
-%     sessionData(sessionIdx, 18) = {mvArrayTime(ONframebool_ms6, :)};
-%     sessionData(sessionIdx, 19) = {mvArrayState(ONframebool_ms6, :)};
-%     sessionData(sessionIdx, 20) = {dlcArray(ONframebool_ms6, :)};
-% end
+    sessionData(sessionIdx, 1) = {mouseName};
+    sessionData(sessionIdx, 2) = {sessionName};
+    for i = 1:6
+        sessionData(sessionIdx, 3*i) = {mvArrayTime(framesList(:, i), :)};
+        sessionData(sessionIdx, 3*i+1) = {mvArrayState(framesList(:, i), :)};
+        sessionData(sessionIdx, 3*i+2) = {dlcArray(framesList(:, i), :)};
+    end
+end
 
 % Save session data to a .mat file
 % save(defaultDir + "/CLOI_SessionData.mat", 'sessionData');
