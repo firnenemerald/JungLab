@@ -1,68 +1,51 @@
-%% Main script for CLOI OF analysis
-% This script is the main script for the analysis of CLOI OF data.
+%% CLOI Open Field Analysis Main Script
 
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
 
-% Clear the workspace
+% Clear workspace
 clear
 close all
 
-% Get CLOI data and save to .mat file
-
-% Specify default directory and mouse names
+% Specify default directory and mouse name cell list
 defaultDir = "D:/CLOI_data";
-mouseNames = ["ChAT_947-2", "ChAT_947-3"];
+mouseNameCell = {"ChAT_947-2", "ChAT_947-3", "ChAT_946-2", "ChAT_967-2"};
 
-% Get the list of session folders for all mice
-sessionNames = cell(length(mouseNames)*12, 2);
-for mouseIdx = 1:length(mouseNames)
-    mouseName = mouseNames(mouseIdx);
-    sessionFolderDir = dir(defaultDir + "/" + mouseName);
-    sessionFolderNames = {sessionFolderDir([sessionFolderDir.isdir] & ~ismember({sessionFolderDir.name}, {'.', '..'})).name};
-    sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 1) = {mouseName};
-    sessionNames(1+(mouseIdx-1)*12:mouseIdx*12, 2) = sessionFolderNames;
-end
+%% Get CLOI data and save to .mat file (Initial data collection)
 
-% Iterate for each session and get DLC, movement data
-sessionData = cell(length(sessionNames), 20);
-for sessionIdx = 1:length(sessionNames)
-    mouseName = sessionNames{sessionIdx, 1};
-    sessionName = sessionNames{sessionIdx, 2};
+% % Get struct data of session folders for selected mice
+% sessionNameStruct = CLOI_GetSessionNameStruct(defaultDir, mouseNameCell);
 
-    % Deconstruct mouse data from session name
-    splitParts = split(sessionName, "_");
-    mouseStatus = splitParts{3} + "";
-    expType = splitParts{4} + "";
-    dateTime = splitParts{5} + "_" + splitParts{6};
+% % Get cell list of session names for selected mice
+% % - mouseState = "All" for all states, "Baseline" for baseline, "Parkinson" for parkinsonian state
+% % - expType = "Both" for both experiments, "CLOI" for CLOI experiment, "Random" for random experiment
+% sessionNameCell = CLOI_GetSessionNameCell(defaultDir, sessionNameStruct, "All", "Both");
 
-    % Load DLC data
-    dlcArray = CLOI_GetDLC(mouseName, mouseStatus, expType, dateTime, "head", defaultDir);
-    
-    % Load movement data
-    [mvArrayTime, mvArrayState] = CLOI_GetMv(mouseName, mouseStatus, expType, dateTime, defaultDir);
+% % Get struct data of DLC, movement, and laser data for selected mice
+% sessionDataStruct = CLOI_GetSessionDataStruct(defaultDir, sessionNameCell);
 
-    % Get minisession (ms) frames
-    OFFframebool_ms1 = (mvArrayTime > 10.0 & mvArrayTime < 120.0);
-    OFFframebool_ms3 = (mvArrayTime >= 240.0 & mvArrayTime < 360.0);
-    OFFframebool_ms5 = (mvArrayTime >= 480.0 & mvArrayTime < 600.0);
-    ONframebool_ms2 = (mvArrayTime >= 120.0 & mvArrayTime < 240.0);
-    ONframebool_ms4 = (mvArrayTime >= 360.0 & mvArrayTime < 480.0);
-    ONframebool_ms6 = (mvArrayTime >= 600.0 & mvArrayTime < 720.0);
-    framesList = [OFFframebool_ms1, ONframebool_ms2, OFFframebool_ms3, ONframebool_ms4, OFFframebool_ms5, ONframebool_ms6];
+% % Save session data to a .mat file
+% save(defaultDir + "/CLOI_SessionDataStruct.mat", 'sessionDataStruct');
 
-    sessionData(sessionIdx, 1) = {mouseName};
-    sessionData(sessionIdx, 2) = {sessionName};
-    for i = 1:6
-        sessionData(sessionIdx, 3*i) = {mvArrayTime(framesList(:, i), :)};
-        sessionData(sessionIdx, 3*i+1) = {mvArrayState(framesList(:, i), :)};
-        sessionData(sessionIdx, 3*i+2) = {dlcArray(framesList(:, i), :)};
-    end
-end
+%% Load session data from .mat file (Use this for analysis)
+load(defaultDir + "/CLOI_SessionDataStruct.mat", 'sessionDataStruct');
 
-% Save session data to a .mat file
-% save(defaultDir + "/CLOI_SessionData.mat", 'sessionData');
-% save("CLOI_SessionData.mat", 'sessionData');
+% Get cell list of session data for selected mice
+% - mouseState = "All" for all states, "Baseline" for baseline, "Parkinson" for parkinsonian state
+% - expType = "Both" for both experiments, "CLOI" for CLOI experiment, "Random" for random experiment
+% - miniSession = "All" for all sessions, "OFF" for MS1, 3, 5, "ON" for MS 2, 4, 6, "Rest" for MS2-6, "MS1" ~ "MS6" for specific sessions
+% - isMerged = true for merging all session data, false for separating session data
+
+%% Average Stop to Movement Transition Time
+
+% Get CLOI sessions
+sessionData_CLOI = CLOI_GetSessionDataCell(sessionDataStruct, "All", "Random", "All", false);
+% Analyze stop to movement transition time
+CLOI_PlotStopToMovement(sessionData_CLOI, "Stop to Movement Transition Time - CLOI Sessions");
+
+%% Movement Length Analysis
+
+% 
 
 %% Get FREQ data and save to .mat file
 
@@ -283,48 +266,48 @@ end
 
 % % Load movement data from a .mat file
 % load("CLOI_MovementData.mat", 'movementData');
-load("FREQ_MovementData.mat", 'movementData');
+% load("FREQ_MovementData.mat", 'movementData');
 
-%% Plot FREQ OFF sessions
+% %% Plot FREQ OFF sessions
 
-offIdx = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; % OFF session indices
-aspectNames = {'Distance', 'MeanSpeed', 'PeakSpeed', 'ValidMoveNum', 'MoveTimeRatioDLC', 'MoveTimeRatioCLOI', 'MovementSimilarity', 'AngleSum', 'AngularVelocitySum'};
-aspectPick = 9;
+% offIdx = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; % OFF session indices
+% aspectNames = {'Distance', 'MeanSpeed', 'PeakSpeed', 'ValidMoveNum', 'MoveTimeRatioDLC', 'MoveTimeRatioCLOI', 'MovementSimilarity', 'AngleSum', 'AngularVelocitySum'};
+% aspectPick = 9;
 
-figure('WindowState', 'maximized');
-barcolors = {[0.8, 0.8, 0.8], [1, 0.5, 0.5]}; % Colors for the bars
-pointcolors = {[0.5, 0.5, 0.5], [1, 0, 0]}; % Colors for the points
+% figure('WindowState', 'maximized');
+% barcolors = {[0.8, 0.8, 0.8], [1, 0.5, 0.5]}; % Colors for the bars
+% pointcolors = {[0.5, 0.5, 0.5], [1, 0, 0]}; % Colors for the points
 
-aspectSearch = 2 + aspectPick + 9 * (offIdx * 2 - 2);
-data = cell2mat(movementData(:, aspectSearch)); % Extract data for the current session type and aspect
-means = mean(data); stds = std(data);
-hold on
-% Plot bar graphs with error bars
-bar_width = 0.6; % Width of the bars
-for i = 1:length(offIdx)
-    if i == 1
-        bar(i, means(i), bar_width, 'FaceColor', barcolors{2});
-    else
-        bar(i, means(i), bar_width, 'FaceColor', barcolors{1});
-    end
-end
-errorbar(1:10, means, stds, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+% aspectSearch = 2 + aspectPick + 9 * (offIdx * 2 - 2);
+% data = cell2mat(movementData(:, aspectSearch)); % Extract data for the current session type and aspect
+% means = mean(data); stds = std(data);
+% hold on
+% % Plot bar graphs with error bars
+% bar_width = 0.6; % Width of the bars
+% for i = 1:length(offIdx)
+%     if i == 1
+%         bar(i, means(i), bar_width, 'FaceColor', barcolors{2});
+%     else
+%         bar(i, means(i), bar_width, 'FaceColor', barcolors{1});
+%     end
+% end
+% errorbar(1:10, means, stds, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
 
-% Plot scatter points
-for i = 1:10
-    if i == 1
-        scatter(i * ones(size(data, 1), 1), data(:, i), 'filled', 'MarkerFaceColor', pointcolors{2}, 'MarkerEdgeColor', 'k', 'LineWidth', 1, 'jitter', 'on', 'jitterAmount', 0.15);
-    else
-        scatter(i * ones(size(data, 1), 1), data(:, i), 'filled', 'MarkerFaceColor', pointcolors{1}, 'MarkerEdgeColor', 'k', 'LineWidth', 1, 'jitter', 'on', 'jitterAmount', 0.15);
-    end
-end
-% Graph settings
-set(gca, 'XTick', 1:10, 'XTickLabel', {'ms1', 'ms3', 'ms5', 'ms7', 'ms9', 'ms11', 'ms13', 'ms15', 'ms17', 'ms19'}, 'FontSize', 12, 'FontWeight', 'bold');
-xlabel("Mini Sessions", 'Interpreter', 'none');
-ylabel(aspectNames{aspectPick}, 'Interpreter', 'none');
-hold off
+% % Plot scatter points
+% for i = 1:10
+%     if i == 1
+%         scatter(i * ones(size(data, 1), 1), data(:, i), 'filled', 'MarkerFaceColor', pointcolors{2}, 'MarkerEdgeColor', 'k', 'LineWidth', 1, 'jitter', 'on', 'jitterAmount', 0.15);
+%     else
+%         scatter(i * ones(size(data, 1), 1), data(:, i), 'filled', 'MarkerFaceColor', pointcolors{1}, 'MarkerEdgeColor', 'k', 'LineWidth', 1, 'jitter', 'on', 'jitterAmount', 0.15);
+%     end
+% end
+% % Graph settings
+% set(gca, 'XTick', 1:10, 'XTickLabel', {'ms1', 'ms3', 'ms5', 'ms7', 'ms9', 'ms11', 'ms13', 'ms15', 'ms17', 'ms19'}, 'FontSize', 12, 'FontWeight', 'bold');
+% xlabel("Mini Sessions", 'Interpreter', 'none');
+% ylabel(aspectNames{aspectPick}, 'Interpreter', 'none');
+% hold off
 
-sgtitle('Movement Data Aspects for Different Session Types');
+% sgtitle('Movement Data Aspects for Different Session Types');
 
 
 %% Plot aspects of movement data - 4 session types, 6 minisessions
