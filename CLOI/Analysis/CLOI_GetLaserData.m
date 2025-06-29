@@ -16,7 +16,7 @@ function [lsTime, lsState] = CLOI_GetLaserData(defaultDir, sessionName)
     lsFile = fullfile(defaultDir, mouseName, sessionName, "Log", lsFileDir.name);
 
     % Read the csv file and extract movement data
-    lsTable = readtable(lsFile, "Range", 2);
+    lsTable = readtable(lsFile, "ReadVariableNames", false);
     lsTime = table2array(lsTable(:, 2));
     lsState = table2array(lsTable(:, 3));
 end
