@@ -1,27 +1,24 @@
-%% CLOI Open Field Analysis Main Script
+%% CLOI Open Field Analysis Script
 
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
 
-% Clear workspace
-clear
-close all
+%% Initialization
+clear; close all
 
-% Constants
-CENTER = [1400, 700]; % Center of the open field arena (in pixels)
-RADIUS = 380; % Radius of the center maze area (in pixels)
-
-% Specify default directory and get session data
+% Specify default directory and get aggregated session data (a total of 111 sessions)
 defaultDir = "C:\Users\chanh\Downloads\CLOI_data_mini";
 sessionData = CLOI_GetSessionData(defaultDir);
 
 % Find indices of sessions with presets or regex patterns
-sessionIndices = CLOI_GetSessionIndices(sessionData, 'preset1');
+sessionIndices = CLOI_GetSessionIndices(sessionData, 'basepark_cloirand');
 fprintf('Found %d sessions matching the pattern.\n', length(sessionIndices));
 
-%{
+% Constants
+CENTER = [1400, 700]; % Center of the open field arena
+RADIUS = 380; % Radius of the center maze area
 
-%% Generate analysis data for the specified sessions
+%% Analyze specified sessions
 
 % Preallocate a struct to store analysis data
 analysisData = struct('sessionName', {}, ...
@@ -154,7 +151,7 @@ for idx = 1:length(sessionIndices)
         turnTotalTime{i} = [turnIpsiTimesMS; turnContraTimesMS];
         turnTotalNum{i} = size(turnTotalTime{i}, 1);
         % Center Maze Analysis
-        [centerMazeTimeMS, centerMazeDistanceMS] = CLOI_CenterMaze_MS(bodyPosDLC, i, boolDownFrameMS, CENTER, RADIUS, 0.707);
+        [centerMazeTimeMS, centerMazeDistanceMS] = CLOI_CenterMaze_MS(bodyPosDLC, i, boolDownFrameMS, CENTER, RADIUS, 0.9);
         centerMazeTime{i} = centerMazeTimeMS;
         centerMazeDist{i} = centerMazeDistanceMS;
     end
@@ -181,16 +178,29 @@ for idx = 1:length(sessionIndices)
     analysisData(analysisDataIdx).centerMazeTime = centerMazeTime;
     analysisData(analysisDataIdx).centerMazeDist = centerMazeDist;
 
+    % Only plot for specific sessions (25, 26, 27, 31, 32, 33)
+    if ismember(analysisDataIdx, [])
+        figure;
+        plot(bodyPosDLC(:, 1), bodyPosDLC(:, 2), 'b-');
+        hold on;
+        plot(CENTER(1), CENTER(2), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
+        viscircles(CENTER, RADIUS, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1);
+        title(sprintf('Session: %s', sessName), 'Interpreter', 'none');
+        xlabel('X Position');
+        ylabel('Y Position');
+        text(1500, 900, sprintf('Distance = %.2f', sum(cell2mat(centerMazeDist))), 'Color', 'k', 'FontSize', 12);
+        axis equal;
+        hold off;
+    end
+
 end
 
 % Save analysis data to a .mat file
 save('CLOI_analysisData.mat', 'analysisData');
 
-%}
-
 % Load the analysis data if needed
-load('CLOI_analysisData.mat', 'analysisData');
-fprintf('Loaded analysis data from CLOI_analysisData.mat\n');
+%load('CLOI_analysisData.mat', 'analysisData');
+%fprintf('Loaded analysis data from CLOI_analysisData.mat\n');
 
 %% Plotting Laser ON and velocity
 % There are two situations where laser is ON:
@@ -216,7 +226,8 @@ plotIndices = {sort([1:12:48, 2:12:48, 3:12:48]), ...
                sort([4:12:48, 5:12:48, 6:12:48]), ...
                sort([7:12:48, 8:12:48, 9:12:48]), ...
                sort([10:12:48, 11:12:48, 12:12:48])};
-CLOI_PlotData(analysisData, plotIndices, 'velocityMean', 'onoff');
+
+CLOI_PlotData(analysisData, plotIndices, 'centerMazeDist', 'onoff');
 
 % You can access any field dynamically using:
 % data = analysisData(analysisDataIdx).(var)

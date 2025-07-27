@@ -29,15 +29,17 @@ function sessionData = CLOI_GetSessionData(defaultDir)
     end
 
     % Preallocate a struct to store session data
-    sessionData = struct('mouseName', {}, 'sessionName', {}, 'dlcTime', {}, ...
-        'dlcCoordHeadX', {}, 'dlcCoordHeadY', {}, 'dlcCoordHeadConf', {}, 'dlcCoordBodyX', {}, 'dlcCoordBodyY', {}, 'dlcCoordBodyConf', {}, 'dlcCoordTailX', {}, 'dlcCoordTailY', {}, 'dlcCoordTailConf', {}, ...
+    sessionData = struct('mouseName', {}, 'sessionName', {}, 'center', {}, 'radius', {}, ...
+        'dlcTime', {}, 'dlcCoordHeadX', {}, 'dlcCoordHeadY', {}, 'dlcCoordHeadConf', {}, ...
+        'dlcCoordBodyX', {}, 'dlcCoordBodyY', {}, 'dlcCoordBodyConf', {}, ...
+        'dlcCoordTailX', {}, 'dlcCoordTailY', {}, 'dlcCoordTailConf', {}, ...
         'mvTime', {}, 'mvState', {}, 'mvCentX', {}, 'mvCentY', {}, 'lsTime', {}, 'lsState', {});
 
     % Iterate through each mouse and get session data
     for mouseIdx = 1:length(mouseNames)
         mouseName = mouseNames{mouseIdx};
 
-        % Make a cell variable to store session names for the current mouse
+        % Make an empty cell variable to store session names for the current mouse
         mouseDirContents = dir(fullfile(defaultDir, mouseName));
         sessionNames = {};
         for j = 1:length(mouseDirContents)
@@ -53,6 +55,12 @@ function sessionData = CLOI_GetSessionData(defaultDir)
             fprintf('Processing session # %s - %s\n', string(sessionDataIdx), sessionName);
             sessionData(sessionDataIdx).mouseName = mouseName;
             sessionData(sessionDataIdx).sessionName = sessionName;
+
+            % Get Center and Radius
+            [center, radius] = CLOI_GetCenterAndRadius(defaultDir, mouseName, sessionName);
+            sessionData(sessionDataIdx).center = center;
+            sessionData(sessionDataIdx).radius = radius;
+
             % Load DeepLabCut data
             [dlcTime, dlcCoordHeadX, dlcCoordHeadY, dlcCoordHeadConf] = CLOI_GetDLCData(defaultDir, sessionName, 'head');
             [~, dlcCoordBodyX, dlcCoordBodyY, dlcCoordBodyConf] = CLOI_GetDLCData(defaultDir, sessionName, 'center');
@@ -67,12 +75,14 @@ function sessionData = CLOI_GetSessionData(defaultDir)
             sessionData(sessionDataIdx).dlcCoordTailX = dlcCoordTailX;
             sessionData(sessionDataIdx).dlcCoordTailY = dlcCoordTailY;
             sessionData(sessionDataIdx).dlcCoordTailConf = dlcCoordTailConf;
+
             % Load Movement data
             [mvTime, mvState, mvCentX, mvCentY] = CLOI_GetMvData(defaultDir, sessionName);
             sessionData(sessionDataIdx).mvTime = mvTime;
             sessionData(sessionDataIdx).mvState = mvState;
             sessionData(sessionDataIdx).mvCentX = mvCentX;
             sessionData(sessionDataIdx).mvCentY = mvCentY;
+            
             % Load Laser data
             [lsTime, lsState] = CLOI_GetLaserData(defaultDir, sessionName);
             sessionData(sessionDataIdx).lsTime = lsTime;

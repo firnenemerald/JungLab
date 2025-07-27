@@ -176,4 +176,29 @@ patch([0 0.5 0.5 0], [ylimits(1) ylimits(1) ylimits(2) ylimits(2)], 'g', 'FaceAl
 % Create legend using only the plot handles (not fill or patch)
 legend(plotHandles, legendEntries, 'Location', 'Best');
 
+% === Plot group average curve with SEM envelope ===
+allVelocities = [];
+for idxMouse = 1:size(VelocitiesTotal, 2)/3
+    velocities_1 = VelocitiesTotal{idxMouse*3-2};
+    velocities_2 = VelocitiesTotal{idxMouse*3-1};
+    velocities_3 = VelocitiesTotal{idxMouse*3};
+    allVelocities = [allVelocities, velocities_1, velocities_2, velocities_3];
+end
+
+groupMean = mean(allVelocities, 2);
+groupSEM = std(allVelocities, 0, 2) / sqrt(size(allVelocities, 2));
+timeRange = -0.5:0.1:2.0;
+
+% Plot the group average with shaded error
+hold on;
+plot(timeRange, groupMean, 'k-', 'LineWidth', 3); % Black bold line
+fill([timeRange, fliplr(timeRange)], ...
+     [groupMean + groupSEM; flipud(groupMean - groupSEM)]', ...
+     'k', 'FaceAlpha', 0.1, 'EdgeColor', 'none');
+
+% Add to legend
+legend([plotHandles, plot(nan, nan, 'k-', 'LineWidth', 3)], ...
+       [legendEntries, {'Group Mean'}], ...
+       'Location', 'Best');
+
 end

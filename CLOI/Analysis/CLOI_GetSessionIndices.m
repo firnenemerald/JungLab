@@ -6,7 +6,7 @@
 function sessionIndices = CLOI_GetSessionIndices(sessionData, sessionNameRegex)
 
 switch sessionNameRegex
-    case 'preset1'
+    case 'basepark_cloirand'
         mouseIDs = {'947-2', '947-3', '946-2', '967-2'}; mousePattern = strjoin(mouseIDs, '|');
         conditions = {'Baseline', 'Parkinson'}; conditionPattern = strjoin(conditions, '|');
         % conditions = {'Parkinson'}; conditionPattern = strjoin(conditions, '|');
@@ -51,6 +51,7 @@ switch sessionNameRegex
 
 end
 
+% Find session indices that match the regex pattern
 sessionIndices = find(cellfun(@(x) ~isempty(regexp(x, sessionNameRegex, 'once')), {sessionData.sessionName}));
 
 end
