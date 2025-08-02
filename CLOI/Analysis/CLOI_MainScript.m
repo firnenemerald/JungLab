@@ -1,4 +1,5 @@
-%% CLOI Open Field Analysis Script
+%% CLOI (Closed-Loop Optogenetic Inhibition) Main Script
+% This matlab script performs analysis on CLOI data
 
 % SPDX-FileCopyrightText: © 2025 Chanhee Jeong <chanheejeong@snu.ac.kr>
 % SPDX-License-Identifier: GPL-3.0-or-later
@@ -6,7 +7,7 @@
 %% Initialization
 clear; close all
 
-% Specify default directory and get aggregated session data (a total of 111 sessions)
+% Specify default directory and get session data
 defaultDir = "C:\Users\chanh\Downloads\CLOI_data_mini";
 sessionData = CLOI_GetSessionData(defaultDir);
 
