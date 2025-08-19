@@ -1,4 +1,4 @@
-function [Totdata] = CLOI_behavcluster(DLCTime, DLCnose, DLCcentre, DLCtail, ArenaSize)
+function [Totdata] = CLOI_behavcluster(DLCTime, DLCnose, DLCcentre, DLCtail, MazeRadius)
 % CLOI_behavcluster
 %   Process “nose”, “center”, “tail” DLC data to detect:
 %     • locomotion intervals (0.5–1σ rule)
@@ -10,11 +10,11 @@ function [Totdata] = CLOI_behavcluster(DLCTime, DLCnose, DLCcentre, DLCtail, Are
 %     2) Print counts of “short” events exactly as in the original
 
 %% 1) CALIBRATION (pixels → cm)
-scaleFactor = 170 / ArenaSize;
+scaleFactor = 30 / MazeRadius;
 
-nose_raw   = DLCnose(:,   1:2) * scaleFactor;  % [N×2]
-centre_raw = DLCcentre(:, 1:2) * scaleFactor;  % [N×2]
-tail_raw   = DLCtail(:,   1:2) * scaleFactor;  % [N×2]
+nose_raw   = DLCnose(:,   1:2) * scaleFactor;  %[N×2]
+centre_raw = DLCcentre(:, 1:2) * scaleFactor;  %[N×2]
+tail_raw   = DLCtail(:,   1:2) * scaleFactor;  %[N×2]
 
 nose_conf   = DLCnose(:,   3);  % [N×1]
 centre_conf = DLCcentre(:, 3);  % [N×1]
